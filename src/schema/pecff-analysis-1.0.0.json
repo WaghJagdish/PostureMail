@@ -1,0 +1,654 @@
+{
+  "$defs": {
+    "CertificateSchema": {
+      "description": "Parsed X.509 certificate forensic record.",
+      "properties": {
+        "fingerprint_sha256": {
+          "description": "SHA-256 fingerprint of DER certificate.",
+          "title": "Fingerprint Sha256",
+          "type": "string"
+        },
+        "spki_sha256": {
+          "description": "SHA-256 of Subject Public Key Info.",
+          "title": "Spki Sha256",
+          "type": "string"
+        },
+        "subject_dn": {
+          "description": "Subject Distinguished Name.",
+          "title": "Subject Dn",
+          "type": "string"
+        },
+        "issuer_dn": {
+          "description": "Issuer Distinguished Name.",
+          "title": "Issuer Dn",
+          "type": "string"
+        },
+        "serial_number": {
+          "description": "Hexadecimal/decimal serial number.",
+          "title": "Serial Number",
+          "type": "string"
+        },
+        "not_before": {
+          "description": "Validity start timestamp.",
+          "format": "date-time",
+          "title": "Not Before",
+          "type": "string"
+        },
+        "not_after": {
+          "description": "Validity expiration timestamp.",
+          "format": "date-time",
+          "title": "Not After",
+          "type": "string"
+        },
+        "lifetime_days": {
+          "description": "Total validity lifetime in days.",
+          "title": "Lifetime Days",
+          "type": "integer"
+        },
+        "public_key_algorithm": {
+          "description": "RSA, ECDSA, Ed25519, etc.",
+          "title": "Public Key Algorithm",
+          "type": "string"
+        },
+        "public_key_bits": {
+          "description": "Key modulus or curve bit size.",
+          "title": "Public Key Bits",
+          "type": "integer"
+        },
+        "signature_algorithm": {
+          "description": "Signature algorithm OID or name.",
+          "title": "Signature Algorithm",
+          "type": "string"
+        },
+        "is_self_signed": {
+          "description": "Whether certificate is self-signed.",
+          "title": "Is Self Signed",
+          "type": "boolean"
+        },
+        "san_dns": {
+          "description": "Subject Alternative Name DNS list.",
+          "items": {
+            "type": "string"
+          },
+          "title": "San Dns",
+          "type": "array"
+        },
+        "sct_count": {
+          "default": 0,
+          "description": "Certificate Transparency SCT count.",
+          "title": "Sct Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "fingerprint_sha256",
+        "spki_sha256",
+        "subject_dn",
+        "issuer_dn",
+        "serial_number",
+        "not_before",
+        "not_after",
+        "lifetime_days",
+        "public_key_algorithm",
+        "public_key_bits",
+        "signature_algorithm",
+        "is_self_signed"
+      ],
+      "title": "CertificateSchema",
+      "type": "object"
+    },
+    "FindingSchema": {
+      "description": "Specific vulnerability, downgrade, or anomaly finding.",
+      "properties": {
+        "id": {
+          "description": "Finding unique ID.",
+          "title": "Id",
+          "type": "string"
+        },
+        "session_id": {
+          "description": "Associated TCP flow session ID.",
+          "title": "Session Id",
+          "type": "string"
+        },
+        "rule_id": {
+          "description": "Rule identifier.",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "title": {
+          "description": "Concise human-readable finding title.",
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "description": "Detailed forensic explanation.",
+          "title": "Description",
+          "type": "string"
+        },
+        "severity": {
+          "description": "Finding severity: INFO, LOW, MEDIUM, HIGH, CRITICAL.",
+          "title": "Severity",
+          "type": "string"
+        },
+        "standards_ref": {
+          "description": "RFC / NIST SP standard reference.",
+          "title": "Standards Ref",
+          "type": "string"
+        },
+        "evidence": {
+          "additionalProperties": true,
+          "description": "Raw protocol evidence.",
+          "title": "Evidence",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "session_id",
+        "rule_id",
+        "title",
+        "description",
+        "severity",
+        "standards_ref"
+      ],
+      "title": "FindingSchema",
+      "type": "object"
+    },
+    "MLAnomalyResultSchema": {
+      "description": "Unsupervised machine learning anomaly detection score.",
+      "properties": {
+        "is_anomaly": {
+          "description": "Whether session is flagged as an outlier.",
+          "title": "Is Anomaly",
+          "type": "boolean"
+        },
+        "anomaly_score": {
+          "description": "Raw anomaly decision score.",
+          "title": "Anomaly Score",
+          "type": "number"
+        },
+        "anomaly_percentile": {
+          "description": "Empirical anomaly percentile 0-100.",
+          "title": "Anomaly Percentile",
+          "type": "number"
+        },
+        "top_feature_explanations": {
+          "description": "Top contributing feature deviations.",
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Top Feature Explanations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "is_anomaly",
+        "anomaly_score",
+        "anomaly_percentile"
+      ],
+      "title": "MLAnomalyResultSchema",
+      "type": "object"
+    },
+    "ProvenanceItemSchema": {
+      "description": "Individual cryptographic finding evidence item with standards citation.",
+      "properties": {
+        "component": {
+          "description": "Evaluated risk component.",
+          "title": "Component",
+          "type": "string"
+        },
+        "rule_id": {
+          "description": "Unique rule identifier (e.g. PROTO-SSL3).",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "penalty": {
+          "description": "Numerical risk penalty applied.",
+          "title": "Penalty",
+          "type": "integer"
+        },
+        "evidence": {
+          "description": "Forensic observation triggering this penalty.",
+          "title": "Evidence",
+          "type": "string"
+        },
+        "nist_reference": {
+          "description": "Official NIST SP 800-57 or RFC section reference.",
+          "title": "Nist Reference",
+          "type": "string"
+        }
+      },
+      "required": [
+        "component",
+        "rule_id",
+        "penalty",
+        "evidence",
+        "nist_reference"
+      ],
+      "title": "ProvenanceItemSchema",
+      "type": "object"
+    },
+    "RiskResultSchema": {
+      "description": "Deterministic NIST SP 800-57 risk score breakdown.",
+      "properties": {
+        "score": {
+          "description": "Deterministic risk score 0 to 100.",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Score",
+          "type": "integer"
+        },
+        "band": {
+          "description": "Risk band: SECURE, ACCEPTABLE, WEAK, HIGH, or CRITICAL.",
+          "title": "Band",
+          "type": "string"
+        },
+        "context_multiplier": {
+          "description": "Context multiplier OMEGA applied.",
+          "title": "Context Multiplier",
+          "type": "number"
+        },
+        "component_scores": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Raw component score breakdown.",
+          "title": "Component Scores",
+          "type": "object"
+        },
+        "component_weights": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Applied weights summing to 1.0.",
+          "title": "Component Weights",
+          "type": "object"
+        },
+        "vetoes": {
+          "description": "Triggered veto floors.",
+          "items": {
+            "$ref": "#/$defs/VetoFindingSchema"
+          },
+          "title": "Vetoes",
+          "type": "array"
+        },
+        "effective_security_bits": {
+          "description": "Effective security strength S_eff bits.",
+          "title": "Effective Security Bits",
+          "type": "integer"
+        },
+        "weight_redistributed": {
+          "description": "Whether TLS 1.3 cert weight was redistributed.",
+          "title": "Weight Redistributed",
+          "type": "boolean"
+        },
+        "provenance": {
+          "description": "Auditable provenance items.",
+          "items": {
+            "$ref": "#/$defs/ProvenanceItemSchema"
+          },
+          "title": "Provenance",
+          "type": "array"
+        }
+      },
+      "required": [
+        "score",
+        "band",
+        "context_multiplier",
+        "component_scores",
+        "component_weights",
+        "effective_security_bits",
+        "weight_redistributed"
+      ],
+      "title": "RiskResultSchema",
+      "type": "object"
+    },
+    "SessionDetailSchema": {
+      "description": "Comprehensive forensic session detail.",
+      "properties": {
+        "id": {
+          "description": "Unique session identifier.",
+          "title": "Id",
+          "type": "string"
+        },
+        "analysis_id": {
+          "description": "Parent analysis execution ID.",
+          "title": "Analysis Id",
+          "type": "string"
+        },
+        "client_ip": {
+          "description": "Client IP address.",
+          "title": "Client Ip",
+          "type": "string"
+        },
+        "client_port": {
+          "description": "Client TCP port.",
+          "title": "Client Port",
+          "type": "integer"
+        },
+        "server_ip": {
+          "description": "Server IP address.",
+          "title": "Server Ip",
+          "type": "string"
+        },
+        "server_port": {
+          "description": "Server TCP port.",
+          "title": "Server Port",
+          "type": "integer"
+        },
+        "protocol": {
+          "description": "SMTP, IMAP, or POP3.",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "mode": {
+          "description": "EXPLICIT or IMPLICIT.",
+          "title": "Mode",
+          "type": "string"
+        },
+        "starttls_state": {
+          "description": "Final STARTTLS state (S0-S4).",
+          "title": "Starttls State",
+          "type": "string"
+        },
+        "risk_score": {
+          "description": "NIST SP 800-57 risk score (0-100).",
+          "title": "Risk Score",
+          "type": "number"
+        },
+        "risk_band": {
+          "description": "SECURE, ACCEPTABLE, WEAK, HIGH, CRITICAL.",
+          "title": "Risk Band",
+          "type": "string"
+        },
+        "ja3": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Client JA3 fingerprint hash.",
+          "title": "Ja3"
+        },
+        "ja4": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Client JA4 fingerprint.",
+          "title": "Ja4"
+        },
+        "sni": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SNI server hostname.",
+          "title": "Sni"
+        },
+        "first_seen": {
+          "description": "First packet capture timestamp (epoch).",
+          "title": "First Seen",
+          "type": "number"
+        },
+        "duration_sec": {
+          "description": "TCP session duration in seconds.",
+          "title": "Duration Sec",
+          "type": "number"
+        },
+        "is_anomaly": {
+          "default": false,
+          "description": "ML anomaly flag.",
+          "title": "Is Anomaly",
+          "type": "boolean"
+        },
+        "c2s_bytes": {
+          "default": 0,
+          "description": "Client to server payload bytes.",
+          "title": "C2S Bytes",
+          "type": "integer"
+        },
+        "s2c_bytes": {
+          "default": 0,
+          "description": "Server to client payload bytes.",
+          "title": "S2C Bytes",
+          "type": "integer"
+        },
+        "ja3s": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Server JA3S fingerprint hash.",
+          "title": "Ja3S"
+        },
+        "server_banner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Observed mail server banner.",
+          "title": "Server Banner"
+        },
+        "ehlo_domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Observed EHLO/HELO domain name.",
+          "title": "Ehlo Domain"
+        },
+        "risk_breakdown": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RiskResultSchema"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Detailed risk audit."
+        },
+        "ml_result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MLAnomalyResultSchema"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "ML anomaly breakdown."
+        },
+        "certificates": {
+          "description": "Certificate chain.",
+          "items": {
+            "$ref": "#/$defs/CertificateSchema"
+          },
+          "title": "Certificates",
+          "type": "array"
+        },
+        "findings": {
+          "description": "Detected security findings.",
+          "items": {
+            "$ref": "#/$defs/FindingSchema"
+          },
+          "title": "Findings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "analysis_id",
+        "client_ip",
+        "client_port",
+        "server_ip",
+        "server_port",
+        "protocol",
+        "mode",
+        "starttls_state",
+        "risk_score",
+        "risk_band",
+        "first_seen",
+        "duration_sec"
+      ],
+      "title": "SessionDetailSchema",
+      "type": "object"
+    },
+    "VetoFindingSchema": {
+      "description": "Categorical risk floor veto item.",
+      "properties": {
+        "rule_id": {
+          "description": "Veto rule identifier.",
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "floor_score": {
+          "description": "Minimum categorical floor score.",
+          "title": "Floor Score",
+          "type": "integer"
+        },
+        "evidence": {
+          "description": "Observed catastrophic flaw.",
+          "title": "Evidence",
+          "type": "string"
+        },
+        "nist_reference": {
+          "description": "Authoritative standard reference.",
+          "title": "Nist Reference",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rule_id",
+        "floor_score",
+        "evidence",
+        "nist_reference"
+      ],
+      "title": "VetoFindingSchema",
+      "type": "object"
+    }
+  },
+  "description": "Complete forensic analysis output document conforming to \u00a75.1 specification.",
+  "properties": {
+    "schema_version": {
+      "default": "1.0.0",
+      "description": "PECFF analysis schema specification version.",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "analysis_id": {
+      "description": "Unique analysis UUID.",
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "created_at": {
+      "description": "Analysis generation timestamp.",
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "pcap_filename": {
+      "description": "Original capture file name.",
+      "title": "Pcap Filename",
+      "type": "string"
+    },
+    "pcap_sha256": {
+      "description": "SHA-256 digest of analyzed capture file.",
+      "title": "Pcap Sha256",
+      "type": "string"
+    },
+    "status": {
+      "description": "Analysis status: PENDING, PROCESSING, COMPLETED, FAILED.",
+      "title": "Status",
+      "type": "string"
+    },
+    "total_packets": {
+      "description": "Total processed packet count.",
+      "title": "Total Packets",
+      "type": "integer"
+    },
+    "total_sessions": {
+      "description": "Total reconstructed mail sessions.",
+      "title": "Total Sessions",
+      "type": "integer"
+    },
+    "overall_risk_score": {
+      "description": "Corpus-level aggregated risk score.",
+      "title": "Overall Risk Score",
+      "type": "number"
+    },
+    "overall_risk_band": {
+      "description": "Aggregated risk band.",
+      "title": "Overall Risk Band",
+      "type": "string"
+    },
+    "summary_data": {
+      "additionalProperties": true,
+      "description": "Corpus summary metrics.",
+      "title": "Summary Data",
+      "type": "object"
+    },
+    "sessions": {
+      "description": "Reconstructed sessions.",
+      "items": {
+        "$ref": "#/$defs/SessionDetailSchema"
+      },
+      "title": "Sessions",
+      "type": "array"
+    },
+    "findings": {
+      "description": "Corpus-wide findings.",
+      "items": {
+        "$ref": "#/$defs/FindingSchema"
+      },
+      "title": "Findings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "created_at",
+    "pcap_filename",
+    "pcap_sha256",
+    "status",
+    "total_packets",
+    "total_sessions",
+    "overall_risk_score",
+    "overall_risk_band"
+  ],
+  "title": "AnalysisDetailResponse",
+  "type": "object"
+}

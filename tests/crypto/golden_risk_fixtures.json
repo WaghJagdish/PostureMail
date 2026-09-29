@@ -1,0 +1,5281 @@
+[
+  {
+    "case_id": 0,
+    "case_name": "pristine_tls13",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 1,
+    "case_name": "pristine_tls12_aead",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 2,
+    "case_name": "veto_null_cipher",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x0001",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 0,
+      "rule_ids": [
+        "CIPHER-NULL",
+        "HASH-MD5",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "CIPHER-NULL",
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 3,
+    "case_name": "veto_export_cipher",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x0008",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 40,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "CIPHER-DES",
+        "CIPHER-EXPORT",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "CIPHER-EXPORT",
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 4,
+    "case_name": "veto_anon_cipher",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x0018",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 0,
+      "rule_ids": [
+        "CIPHER-ANON",
+        "CIPHER-RC4",
+        "HASH-MD5",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "CIPHER-ANON",
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 5,
+    "case_name": "veto_ssl2",
+    "inputs": {
+      "protocol_version": "SSL 2.0",
+      "cipher_id": "0x010080",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 0,
+      "rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL2"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL2"
+      ]
+    }
+  },
+  {
+    "case_id": 6,
+    "case_name": "veto_ssl3",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 7,
+    "case_name": "veto_no_tls_with_auth",
+    "inputs": {
+      "protocol_version": "NONE",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": true,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-NO-TLS-AUTH"
+      ],
+      "veto_rule_ids": [
+        "PROTO-NO-TLS-AUTH"
+      ]
+    }
+  },
+  {
+    "case_id": 8,
+    "case_name": "veto_dhe_logjam_512",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x0033",
+      "kex_algorithm": "DHE",
+      "named_group": "x25519",
+      "dh_key_bits": 512,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 0,
+      "rule_ids": [
+        "KEX-DHE-LOGJAM",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "KEX-DHE-LOGJAM",
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 9,
+    "case_name": "veto_rsa_512_cert",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 512,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 56,
+      "rule_ids": [
+        "CERT-RSA-512",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "CERT-RSA-512",
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 10,
+    "case_name": "veto_md5_cert_signature",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "MD5",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-SIG-MD5"
+      ],
+      "veto_rule_ids": [
+        "CERT-SIG-MD5"
+      ]
+    }
+  },
+  {
+    "case_id": 11,
+    "case_name": "veto_revoked_cert",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": false,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "REVOKED",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-REVOKED"
+      ],
+      "veto_rule_ids": [
+        "CERT-REVOKED"
+      ]
+    }
+  },
+  {
+    "case_id": 12,
+    "case_name": "veto_compromised_spki",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": true,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-COMPROMISED-KEY"
+      ],
+      "veto_rule_ids": [
+        "CERT-COMPROMISED-KEY"
+      ]
+    }
+  },
+  {
+    "case_id": 13,
+    "case_name": "tls10_rc4_submission_port",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 14,
+    "case_name": "tls11_3des_cleartext_creds",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 15,
+    "case_name": "tls12_static_rsa_no_ems",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "RSA",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-NO-EMS",
+        "KEX-STATIC-RSA",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 16,
+    "case_name": "tls12_dhe_1024_sha1_mac",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x0033",
+      "kex_algorithm": "DHE",
+      "named_group": "x25519",
+      "dh_key_bits": 1024,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 0,
+      "rule_ids": [
+        "KEX-DHE-WEAK",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 17,
+    "case_name": "tls12_weak_ecdhe_secp192r1",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "secp192r1",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 14,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "KEX-ECDHE-WEAK-CURVE"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 18,
+    "case_name": "cert_expired_at_capture",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": false,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 14,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-EXPIRED"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 19,
+    "case_name": "cert_self_signed",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": true,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": false,
+      "chain_anchor_source": "self_signed",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 13,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-SELF-SIGNED"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 20,
+    "case_name": "cert_hostname_mismatch",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MISMATCH"
+    },
+    "expected_output": {
+      "score": 16,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-HOSTNAME-MISMATCH"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 21,
+    "case_name": "hygiene_compression_crime",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 1,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 8,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-COMPRESSION-CRIME"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 22,
+    "case_name": "hygiene_long_ticket_lifetime",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 1000000,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 2,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [
+        "HYGIENE-LONG-TICKET"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 23,
+    "case_name": "hygiene_0rtt_submission_port",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": true,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 4,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [
+        "HYGIENE-0RTT-SUBMISSION"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 24,
+    "case_name": "hygiene_incomplete_handshake",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": false,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 2,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-INCOMPLETE-HANDSHAKE"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 25,
+    "case_name": "scenario_025",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 26,
+    "case_name": "scenario_026",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 900,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CERT-LIFETIME-825",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 27,
+    "case_name": "scenario_027",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 28,
+    "case_name": "scenario_028",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-INSECURE-RENEG",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 29,
+    "case_name": "scenario_029",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 30,
+    "case_name": "scenario_030",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 31,
+    "case_name": "scenario_031",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "HYGIENE-NO-EMS",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 32,
+    "case_name": "scenario_032",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 21,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-INSECURE-RENEG",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 33,
+    "case_name": "scenario_033",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 1,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 32,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-COMPRESSION-CRIME",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 34,
+    "case_name": "scenario_034",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-NO-SCT",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 35,
+    "case_name": "scenario_035",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.25,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 36,
+    "case_name": "scenario_036",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 7,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-INSECURE-RENEG"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 37,
+    "case_name": "scenario_037",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 15,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 38,
+    "case_name": "scenario_038",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 1024,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CERT-RSA-1024",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 39,
+    "case_name": "scenario_039",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 900,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-LIFETIME-825",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 40,
+    "case_name": "scenario_040",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 41,
+    "case_name": "scenario_041",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-NO-EMS",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 42,
+    "case_name": "scenario_042",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 43,
+    "case_name": "scenario_043",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 44,
+    "case_name": "scenario_044",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 1,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-COMPRESSION-CRIME",
+        "HYGIENE-INSECURE-RENEG",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 45,
+    "case_name": "scenario_045",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 46,
+    "case_name": "scenario_046",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 47,
+    "case_name": "scenario_047",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 48,
+    "case_name": "scenario_048",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 30,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-INSECURE-RENEG",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 49,
+    "case_name": "scenario_049",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 50,
+    "case_name": "scenario_050",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 51,
+    "case_name": "scenario_051",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 5,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-NO-SCT",
+        "HYGIENE-NO-EMS"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 52,
+    "case_name": "scenario_052",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 900,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 28,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-LIFETIME-825",
+        "HYGIENE-INSECURE-RENEG",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 53,
+    "case_name": "scenario_053",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 20,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 54,
+    "case_name": "scenario_054",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 55,
+    "case_name": "scenario_055",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 1,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 12,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [
+        "HYGIENE-COMPRESSION-CRIME"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 56,
+    "case_name": "scenario_056",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-INSECURE-RENEG",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 57,
+    "case_name": "scenario_057",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 1024,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CERT-RSA-1024",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 58,
+    "case_name": "scenario_058",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 59,
+    "case_name": "scenario_059",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 60,
+    "case_name": "scenario_060",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 61,
+    "case_name": "scenario_061",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-NO-EMS",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 62,
+    "case_name": "scenario_062",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 63,
+    "case_name": "scenario_063",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 64,
+    "case_name": "scenario_064",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-INSECURE-RENEG",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 65,
+    "case_name": "scenario_065",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 66,
+    "case_name": "scenario_066",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 1,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 9,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-COMPRESSION-CRIME"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 67,
+    "case_name": "scenario_067",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 15,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 68,
+    "case_name": "scenario_068",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 28,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-NO-SCT",
+        "HYGIENE-INSECURE-RENEG",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 69,
+    "case_name": "scenario_069",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 70,
+    "case_name": "scenario_070",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.25,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 71,
+    "case_name": "scenario_071",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 2,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-NO-EMS"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 72,
+    "case_name": "scenario_072",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-INSECURE-RENEG",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 73,
+    "case_name": "scenario_073",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 74,
+    "case_name": "scenario_074",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 75,
+    "case_name": "scenario_075",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 76,
+    "case_name": "scenario_076",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 1024,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CERT-RSA-1024",
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-INSECURE-RENEG",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 77,
+    "case_name": "scenario_077",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 1,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-COMPRESSION-CRIME",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 78,
+    "case_name": "scenario_078",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 900,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CERT-LIFETIME-825",
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 79,
+    "case_name": "scenario_079",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 80,
+    "case_name": "scenario_080",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 81,
+    "case_name": "scenario_081",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 3,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-NO-EMS"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 82,
+    "case_name": "scenario_082",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 15,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 83,
+    "case_name": "scenario_083",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 20,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 84,
+    "case_name": "scenario_084",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-INSECURE-RENEG",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 85,
+    "case_name": "scenario_085",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 86,
+    "case_name": "scenario_086",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 87,
+    "case_name": "scenario_087",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 17,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 88,
+    "case_name": "scenario_088",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 1,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-COMPRESSION-CRIME",
+        "HYGIENE-INSECURE-RENEG",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 89,
+    "case_name": "scenario_089",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 90,
+    "case_name": "scenario_090",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 91,
+    "case_name": "scenario_091",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 900,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CERT-LIFETIME-825",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-NO-EMS",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 92,
+    "case_name": "scenario_092",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-INSECURE-RENEG",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 93,
+    "case_name": "scenario_093",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 94,
+    "case_name": "scenario_094",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 95,
+    "case_name": "scenario_095",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 96,
+    "case_name": "scenario_096",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 7,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-INSECURE-RENEG"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 97,
+    "case_name": "scenario_097",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 15,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 98,
+    "case_name": "scenario_098",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 25,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 99,
+    "case_name": "scenario_099",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 1,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-COMPRESSION-CRIME",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 100,
+    "case_name": "scenario_100",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 101,
+    "case_name": "scenario_101",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 2,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-NO-EMS"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 102,
+    "case_name": "scenario_102",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 19,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-NO-SCT",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 103,
+    "case_name": "scenario_103",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 20,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 104,
+    "case_name": "scenario_104",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 900,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CERT-LIFETIME-825",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-INSECURE-RENEG",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 105,
+    "case_name": "scenario_105",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x0035",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 106,
+    "case_name": "scenario_106",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 107,
+    "case_name": "scenario_107",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x002F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 108,
+    "case_name": "scenario_108",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "HYGIENE-INSECURE-RENEG",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 109,
+    "case_name": "scenario_109",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x000A",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-3DES",
+        "CIPHER-CBC-NO-ETM",
+        "HASH-SHA1-MAC",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 110,
+    "case_name": "scenario_110",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 1,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "HYGIENE-COMPRESSION-CRIME",
+        "NIST-MIN-STRENGTH"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 111,
+    "case_name": "scenario_111",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0x0005",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 90,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CIPHER-RC4",
+        "HASH-SHA1-MAC",
+        "HYGIENE-NO-EMS",
+        "NIST-MIN-STRENGTH",
+        "PROTO-TLS12-LEGACY"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH"
+      ]
+    }
+  },
+  {
+    "case_id": 112,
+    "case_name": "scenario_112",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 26,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-INSECURE-RENEG",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 113,
+    "case_name": "scenario_113",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0x1301",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 20,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 114,
+    "case_name": "scenario_114",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 1024,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 80,
+      "rule_ids": [
+        "CERT-RSA-1024",
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "NIST-MIN-STRENGTH",
+        "PROTO-SSL3"
+      ]
+    }
+  },
+  {
+    "case_id": 115,
+    "case_name": "scenario_115",
+    "inputs": {
+      "protocol_version": "TLS 1.3",
+      "cipher_id": "0x1302",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 465,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": false,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": null,
+      "cert_sig_hash": null,
+      "cert_is_self_signed": null,
+      "cert_lifetime_days": null,
+      "chain_is_valid": null,
+      "chain_anchor_source": null,
+      "chain_ocsp_status": null,
+      "host_status": null
+    },
+    "expected_output": {
+      "score": 0,
+      "band": "SECURE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": true,
+      "effective_security_bits": 128,
+      "rule_ids": [],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 116,
+    "case_name": "scenario_116",
+    "inputs": {
+      "protocol_version": "TLS 1.2",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": false,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 6,
+      "band": "SECURE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "HYGIENE-INSECURE-RENEG"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 117,
+    "case_name": "scenario_117",
+    "inputs": {
+      "protocol_version": "TLS 1.1",
+      "cipher_id": "0xC02F",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 587,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 900,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 25,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.15,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-LIFETIME-825",
+        "PROTO-TLS11"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 118,
+    "case_name": "scenario_118",
+    "inputs": {
+      "protocol_version": "TLS 1.0",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": false,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": true,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 20,
+      "band": "ACCEPTABLE",
+      "context_multiplier": 1.0,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "PROTO-TLS10"
+      ],
+      "veto_rule_ids": []
+    }
+  },
+  {
+    "case_id": 119,
+    "case_name": "scenario_119",
+    "inputs": {
+      "protocol_version": "SSL 3.0",
+      "cipher_id": "0xC030",
+      "kex_algorithm": "ECDHE",
+      "named_group": "x25519",
+      "dh_key_bits": 2048,
+      "dst_port": 25,
+      "has_auth": false,
+      "cleartext_credentials_observed": true,
+      "handshake_completed": true,
+      "cert_analysis_possible": true,
+      "extended_master_secret": false,
+      "secure_renegotiation": true,
+      "compression_method": 0,
+      "ticket_lifetime_seconds": 3600,
+      "zero_rtt_used": false,
+      "known_compromised_spki": false,
+      "cert_key_bits": 2048,
+      "cert_sig_hash": "SHA256",
+      "cert_is_self_signed": false,
+      "cert_lifetime_days": 273,
+      "chain_is_valid": true,
+      "chain_anchor_source": "mozilla_nss",
+      "chain_ocsp_status": "GOOD",
+      "host_status": "MATCH"
+    },
+    "expected_output": {
+      "score": 100,
+      "band": "CRITICAL",
+      "context_multiplier": 1.25,
+      "weight_redistributed": false,
+      "effective_security_bits": 112,
+      "rule_ids": [
+        "CERT-NO-SCT",
+        "PROTO-SSL3"
+      ],
+      "veto_rule_ids": [
+        "PROTO-SSL3"
+      ]
+    }
+  }
+]

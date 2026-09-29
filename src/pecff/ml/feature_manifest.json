@@ -1,0 +1,118 @@
+{
+  "manifest_version": "1.0.0",
+  "total_dimensions": 94,
+  "blocks": {
+    "fingerprints": {
+      "dimensions": 32,
+      "method": "HashingVectorizer(n_features=32, alternate_sign=False)",
+      "prefix": "fp_hash_"
+    },
+    "cipher_profile": {
+      "dimensions": 15,
+      "features": [
+        "ciph_n_offered",
+        "ciph_n_grease",
+        "ciph_top1_id",
+        "ciph_top2_id",
+        "ciph_top3_id",
+        "ciph_top4_id",
+        "ciph_top5_id",
+        "ciph_mean_strength",
+        "ciph_min_strength",
+        "ciph_offers_3des",
+        "ciph_offers_rc4",
+        "ciph_offers_null",
+        "ciph_pct_aead",
+        "ciph_pct_pfs",
+        "ciph_list_entropy"
+      ]
+    },
+    "extension_profile": {
+      "dimensions": 11,
+      "features": [
+        "ext_bitmap_24",
+        "ext_count",
+        "ext_order_hash",
+        "ext_has_sni",
+        "ext_sni_is_ip",
+        "ext_sni_entropy",
+        "ext_sni_label_count",
+        "ext_has_alpn",
+        "ext_alpn_hash",
+        "ext_has_padding",
+        "ext_padding_len"
+      ]
+    },
+    "crypto_params": {
+      "dimensions": 10,
+      "features": [
+        "crypto_selected_version",
+        "crypto_selected_cipher",
+        "crypto_kex_group",
+        "crypto_pubkey_bits",
+        "crypto_sig_alg",
+        "crypto_cert_chain_len",
+        "crypto_cert_lifetime_days",
+        "crypto_is_self_signed",
+        "crypto_san_count",
+        "crypto_risk_score"
+      ]
+    },
+    "session_metadata": {
+      "dimensions": 18,
+      "features": [
+        "meta_client_hello_len",
+        "meta_server_hello_len",
+        "meta_total_hs_bytes",
+        "meta_n_hs_packets",
+        "meta_pkt_size_mean",
+        "meta_pkt_size_std",
+        "meta_pkt_size_min",
+        "meta_pkt_size_max",
+        "meta_iat_mean",
+        "meta_iat_std",
+        "meta_iat_min",
+        "meta_iat_max",
+        "meta_rtt_estimate_ms",
+        "meta_hs_duration_ms",
+        "meta_tcp_retrans_count",
+        "meta_tcp_overlap_count",
+        "meta_ttl_client",
+        "meta_tcp_window_scale"
+      ]
+    },
+    "behavioral": {
+      "dimensions": 8,
+      "features": [
+        "beh_starttls_state",
+        "beh_sessions_from_src",
+        "beh_distinct_sni_per_src",
+        "beh_dst_port",
+        "beh_port_is_standard_mail",
+        "beh_bytes_up_down_ratio",
+        "beh_session_duration_s",
+        "beh_is_periodic"
+      ]
+    }
+  },
+  "ordered_features": [
+    "fp_hash_00", "fp_hash_01", "fp_hash_02", "fp_hash_03", "fp_hash_04", "fp_hash_05", "fp_hash_06", "fp_hash_07",
+    "fp_hash_08", "fp_hash_09", "fp_hash_10", "fp_hash_11", "fp_hash_12", "fp_hash_13", "fp_hash_14", "fp_hash_15",
+    "fp_hash_16", "fp_hash_17", "fp_hash_18", "fp_hash_19", "fp_hash_20", "fp_hash_21", "fp_hash_22", "fp_hash_23",
+    "fp_hash_24", "fp_hash_25", "fp_hash_26", "fp_hash_27", "fp_hash_28", "fp_hash_29", "fp_hash_30", "fp_hash_31",
+    "ciph_n_offered", "ciph_n_grease", "ciph_top1_id", "ciph_top2_id", "ciph_top3_id", "ciph_top4_id", "ciph_top5_id",
+    "ciph_mean_strength", "ciph_min_strength", "ciph_offers_3des", "ciph_offers_rc4", "ciph_offers_null",
+    "ciph_pct_aead", "ciph_pct_pfs", "ciph_list_entropy",
+    "ext_bitmap_24", "ext_count", "ext_order_hash", "ext_has_sni", "ext_sni_is_ip", "ext_sni_entropy",
+    "ext_sni_label_count", "ext_has_alpn", "ext_alpn_hash", "ext_has_padding", "ext_padding_len",
+    "crypto_selected_version", "crypto_selected_cipher", "crypto_kex_group", "crypto_pubkey_bits", "crypto_sig_alg",
+    "crypto_cert_chain_len", "crypto_cert_lifetime_days", "crypto_is_self_signed", "crypto_san_count", "crypto_risk_score",
+    "meta_client_hello_len", "meta_server_hello_len", "meta_total_hs_bytes", "meta_n_hs_packets",
+    "meta_pkt_size_mean", "meta_pkt_size_std", "meta_pkt_size_min", "meta_pkt_size_max",
+    "meta_iat_mean", "meta_iat_std", "meta_iat_min", "meta_iat_max",
+    "meta_rtt_estimate_ms", "meta_hs_duration_ms", "meta_tcp_retrans_count", "meta_tcp_overlap_count",
+    "meta_ttl_client", "meta_tcp_window_scale",
+    "beh_starttls_state", "beh_sessions_from_src", "beh_distinct_sni_per_src", "beh_dst_port",
+    "beh_port_is_standard_mail", "beh_bytes_up_down_ratio", "beh_session_duration_s", "beh_is_periodic"
+  ]
+}

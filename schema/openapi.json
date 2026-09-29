@@ -1,0 +1,1239 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "PECFF - Passive Email Cryptographic Forensics Framework",
+    "description": "Passive network forensics and cryptographic analysis API for SMTP/IMAP/POP3 traffic. Implements pure deterministic NIST SP 800-57 risk scoring, JA3/JA4 TLS fingerprinting, unsupervised ML anomaly detection, and hostile-input hardened parsing.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/pcaps": {
+      "post": {
+        "tags": [
+          "PCAP Ingestion"
+        ],
+        "summary": "Upload and ingest a PCAP/PCAPNG capture file with streaming SHA-256 hashing",
+        "description": "Stream multipart upload directly to storage, compute SHA-256 in chunks, validate magic bytes.",
+        "operationId": "upload_pcap_api_v1_pcaps_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_pcap_api_v1_pcaps_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PcapUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/pcaps/presign": {
+      "post": {
+        "tags": [
+          "PCAP Ingestion"
+        ],
+        "summary": "Generate presigned S3 PUT URL for direct uploads exceeding 2 GiB",
+        "description": "Generate time-limited presigned PUT URL allowing client to upload directly to MinIO/S3.",
+        "operationId": "get_presigned_upload_url_api_v1_pcaps_presign_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PresignedUploadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresignedUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tasks/{task_id}": {
+      "get": {
+        "tags": [
+          "Task Tracking"
+        ],
+        "summary": "Retrieve real-time execution progress, stage, and completion state",
+        "description": "Query current pipeline execution state, stage details, packet counts, and ETA.",
+        "operationId": "get_task_status_api_v1_tasks__task_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Task Tracking"
+        ],
+        "summary": "Revoke and cancel an ongoing analysis task",
+        "description": "Terminate and revoke an active analysis task.",
+        "operationId": "revoke_task_api_v1_tasks__task_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses/{analysis_id}": {
+      "get": {
+        "tags": [
+          "Analyses & Sessions"
+        ],
+        "summary": "Stream full forensic analysis document incrementally without large RAM buffers",
+        "description": "Stream full JSON document chunk by chunk using incremental generator.",
+        "operationId": "get_analysis_document_api_v1_analyses__analysis_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analyses/{analysis_id}/sessions": {
+      "get": {
+        "tags": [
+          "Analyses & Sessions"
+        ],
+        "summary": "Server-side cursor-based session filtering and sorting (sub-200ms p95 on 100k flows)",
+        "description": "Cursor-paginated session search with indexed filtering.",
+        "operationId": "list_analysis_sessions_api_v1_analyses__analysis_id__sessions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Analysis Id"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque pagination cursor token",
+              "title": "Cursor"
+            },
+            "description": "Opaque pagination cursor token"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 500,
+              "minimum": 1,
+              "description": "Page item limit",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Page item limit"
+          },
+          {
+            "name": "min_risk",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "maximum": 100.0,
+                  "minimum": 0.0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Minimum risk score filter",
+              "title": "Min Risk"
+            },
+            "description": "Minimum risk score filter"
+          },
+          {
+            "name": "band",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Risk band filter: SECURE, ACCEPTABLE, WEAK, HIGH, CRITICAL",
+              "title": "Band"
+            },
+            "description": "Risk band filter: SECURE, ACCEPTABLE, WEAK, HIGH, CRITICAL"
+          },
+          {
+            "name": "protocol",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Mail protocol: SMTP, IMAP, POP3",
+              "title": "Protocol"
+            },
+            "description": "Mail protocol: SMTP, IMAP, POP3"
+          },
+          {
+            "name": "starttls_state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "STARTTLS state: S0_TCP_EST to S4_TLS_READY",
+              "title": "Starttls State"
+            },
+            "description": "STARTTLS state: S0_TCP_EST to S4_TLS_READY"
+          },
+          {
+            "name": "is_anomaly",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ML anomaly flag filter",
+              "title": "Is Anomaly"
+            },
+            "description": "ML anomaly flag filter"
+          },
+          {
+            "name": "ja3",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Client JA3 hash filter",
+              "title": "Ja3"
+            },
+            "description": "Client JA3 hash filter"
+          },
+          {
+            "name": "sni",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Target SNI hostname substring",
+              "title": "Sni"
+            },
+            "description": "Target SNI hostname substring"
+          },
+          {
+            "name": "dst_ip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Destination server IP address",
+              "title": "Dst Ip"
+            },
+            "description": "Destination server IP address"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(risk|anomaly|ts)$",
+              "description": "Sort field: risk, anomaly, ts",
+              "default": "risk",
+              "title": "Sort By"
+            },
+            "description": "Sort field: risk, anomaly, ts"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(asc|desc)$",
+              "description": "Sort order: asc or desc",
+              "default": "desc",
+              "title": "Sort Order"
+            },
+            "description": "Sort order: asc or desc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPaginatedSessions"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/verdict": {
+      "post": {
+        "tags": [
+          "Verdicts & Audit Logs"
+        ],
+        "summary": "Submit analyst forensic verdict and ground-truth label for a session",
+        "description": "Record an analyst ground-truth verdict with forensic notes and confidence score.",
+        "operationId": "submit_session_verdict_api_v1_sessions__session_id__verdict_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerdictSubmissionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerdictSubmissionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit/logs": {
+      "get": {
+        "tags": [
+          "Verdicts & Audit Logs"
+        ],
+        "summary": "Retrieve forensic security audit log entries (admin role required)",
+        "description": "Retrieve immutable audit event logs.",
+        "operationId": "list_audit_logs_api_v1_audit_logs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AuditLogEntrySchema"
+                  },
+                  "type": "array",
+                  "title": "Response List Audit Logs Api V1 Audit Logs Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Health Check",
+        "operationId": "health_check_healthz_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Check Healthz Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/version": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Get Version",
+        "operationId": "get_version_api_v1_version_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Get Version Api V1 Version Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AuditLogEntrySchema": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          },
+          "principal": {
+            "type": "string",
+            "title": "Principal"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "resource_id": {
+            "type": "string",
+            "title": "Resource Id"
+          },
+          "ip_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip Address"
+          },
+          "status_code": {
+            "type": "integer",
+            "title": "Status Code",
+            "default": 200
+          },
+          "details": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "principal",
+          "role",
+          "action",
+          "resource_id"
+        ],
+        "title": "AuditLogEntrySchema",
+        "description": "Security audit event log entry."
+      },
+      "Body_upload_pcap_api_v1_pcaps_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "PCAP or PCAPNG network capture file"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_pcap_api_v1_pcaps_post"
+      },
+      "CursorPaginatedSessions": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SessionSummarySchema"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Page session records."
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "Opaque cursor string for fetching the next page."
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "description": "Whether additional records exist beyond this page."
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count",
+            "description": "Total matched sessions across all pages."
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "has_more",
+          "total_count"
+        ],
+        "title": "CursorPaginatedSessions",
+        "description": "Cursor-based server-side pagination response."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PcapUploadResponse": {
+        "properties": {
+          "analysis_id": {
+            "type": "string",
+            "title": "Analysis Id",
+            "description": "Unique UUID for this analysis execution."
+          },
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "description": "Celery asynchronous pipeline task identifier."
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256",
+            "description": "Hexadecimal SHA-256 digest of uploaded PCAP artifact."
+          },
+          "status_url": {
+            "type": "string",
+            "title": "Status Url",
+            "description": "Polling endpoint for progress and state updates."
+          },
+          "duplicate_of": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duplicate Of",
+            "description": "If hash already exists in repository, ID of existing analysis."
+          },
+          "is_duplicate": {
+            "type": "boolean",
+            "title": "Is Duplicate",
+            "description": "Whether this upload was deduplicated against an existing archive.",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "analysis_id",
+          "task_id",
+          "sha256",
+          "status_url"
+        ],
+        "title": "PcapUploadResponse",
+        "description": "HTTP 202 / 200 Upload ingestion response."
+      },
+      "PresignedUploadRequest": {
+        "properties": {
+          "filename": {
+            "type": "string",
+            "title": "Filename",
+            "description": "Target PCAP/PCAPNG capture filename."
+          },
+          "size_bytes": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Size Bytes",
+            "description": "Exact file size in bytes."
+          },
+          "sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sha256",
+            "description": "Optional anticipated SHA-256 checksum."
+          }
+        },
+        "type": "object",
+        "required": [
+          "filename",
+          "size_bytes"
+        ],
+        "title": "PresignedUploadRequest",
+        "description": "Request for direct-to-object-storage upload for large capture files."
+      },
+      "PresignedUploadResponse": {
+        "properties": {
+          "upload_url": {
+            "type": "string",
+            "title": "Upload Url",
+            "description": "Time-limited presigned S3 PUT URL."
+          },
+          "file_key": {
+            "type": "string",
+            "title": "File Key",
+            "description": "Assigned storage key in object bucket."
+          },
+          "expires_in_seconds": {
+            "type": "integer",
+            "title": "Expires In Seconds",
+            "description": "Validity period of presigned URL.",
+            "default": 3600
+          },
+          "analysis_id": {
+            "type": "string",
+            "title": "Analysis Id",
+            "description": "Pre-allocated analysis identifier."
+          }
+        },
+        "type": "object",
+        "required": [
+          "upload_url",
+          "file_key",
+          "analysis_id"
+        ],
+        "title": "PresignedUploadResponse",
+        "description": "Presigned PUT URL for direct MinIO/S3 ingestion."
+      },
+      "SessionSummarySchema": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique session identifier."
+          },
+          "analysis_id": {
+            "type": "string",
+            "title": "Analysis Id",
+            "description": "Parent analysis execution ID."
+          },
+          "client_ip": {
+            "type": "string",
+            "title": "Client Ip",
+            "description": "Client IP address."
+          },
+          "client_port": {
+            "type": "integer",
+            "title": "Client Port",
+            "description": "Client TCP port."
+          },
+          "server_ip": {
+            "type": "string",
+            "title": "Server Ip",
+            "description": "Server IP address."
+          },
+          "server_port": {
+            "type": "integer",
+            "title": "Server Port",
+            "description": "Server TCP port."
+          },
+          "protocol": {
+            "type": "string",
+            "title": "Protocol",
+            "description": "SMTP, IMAP, or POP3."
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "description": "EXPLICIT or IMPLICIT."
+          },
+          "starttls_state": {
+            "type": "string",
+            "title": "Starttls State",
+            "description": "Final STARTTLS state (S0-S4)."
+          },
+          "risk_score": {
+            "type": "number",
+            "title": "Risk Score",
+            "description": "NIST SP 800-57 risk score (0-100)."
+          },
+          "risk_band": {
+            "type": "string",
+            "title": "Risk Band",
+            "description": "SECURE, ACCEPTABLE, WEAK, HIGH, CRITICAL."
+          },
+          "ja3": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ja3",
+            "description": "Client JA3 fingerprint hash."
+          },
+          "ja4": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ja4",
+            "description": "Client JA4 fingerprint."
+          },
+          "sni": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sni",
+            "description": "SNI server hostname."
+          },
+          "first_seen": {
+            "type": "number",
+            "title": "First Seen",
+            "description": "First packet capture timestamp (epoch)."
+          },
+          "duration_sec": {
+            "type": "number",
+            "title": "Duration Sec",
+            "description": "TCP session duration in seconds."
+          },
+          "is_anomaly": {
+            "type": "boolean",
+            "title": "Is Anomaly",
+            "description": "ML anomaly flag.",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "analysis_id",
+          "client_ip",
+          "client_port",
+          "server_ip",
+          "server_port",
+          "protocol",
+          "mode",
+          "starttls_state",
+          "risk_score",
+          "risk_band",
+          "first_seen",
+          "duration_sec"
+        ],
+        "title": "SessionSummarySchema",
+        "description": "Summary record for session listing and cursor pagination."
+      },
+      "TaskStatusResponse": {
+        "properties": {
+          "task_id": {
+            "type": "string",
+            "title": "Task Id",
+            "description": "Celery task identifier."
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PARSING",
+              "SCORING",
+              "SCORING_ML",
+              "SUCCESS",
+              "FAILURE",
+              "REVOKED"
+            ],
+            "title": "State",
+            "description": "Current pipeline execution state."
+          },
+          "progress": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Progress",
+            "description": "Normalized progress fraction 0.0 to 1.0.",
+            "default": 0.0
+          },
+          "stage_detail": {
+            "type": "string",
+            "title": "Stage Detail",
+            "description": "Human-readable description of active pipeline stage.",
+            "default": ""
+          },
+          "packets_processed": {
+            "type": "integer",
+            "title": "Packets Processed",
+            "description": "Number of packets parsed so far.",
+            "default": 0
+          },
+          "total_packets": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Packets",
+            "description": "Total packet count if known."
+          },
+          "eta_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eta Seconds",
+            "description": "Estimated time remaining in seconds."
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error",
+            "description": "Error message if state is FAILURE."
+          },
+          "analysis_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Id",
+            "description": "Resulting analysis ID upon completion."
+          }
+        },
+        "type": "object",
+        "required": [
+          "task_id",
+          "state"
+        ],
+        "title": "TaskStatusResponse",
+        "description": "Real-time task tracking status payload."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VerdictSubmissionRequest": {
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "enum": [
+              "BENIGN",
+              "SUSPICIOUS",
+              "MALICIOUS",
+              "POLICY_VIOLATION"
+            ],
+            "title": "Verdict"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "default": 1.0
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 4096,
+            "title": "Notes",
+            "default": ""
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "verdict"
+        ],
+        "title": "VerdictSubmissionRequest",
+        "description": "Analyst verdict and forensic ground-truth submission."
+      },
+      "VerdictSubmissionResponse": {
+        "properties": {
+          "verdict_id": {
+            "type": "string",
+            "title": "Verdict Id"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "analyst_id": {
+            "type": "string",
+            "title": "Analyst Id"
+          },
+          "submitted_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Submitted At"
+          },
+          "verdict": {
+            "type": "string",
+            "title": "Verdict"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "RECORDED"
+          }
+        },
+        "type": "object",
+        "required": [
+          "verdict_id",
+          "session_id",
+          "analyst_id",
+          "verdict"
+        ],
+        "title": "VerdictSubmissionResponse",
+        "description": "Verdict confirmation payload."
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

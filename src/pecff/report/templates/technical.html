@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Technical Cryptographic Forensics Audit — {{ analysis.pcap_filename }}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #f8fafc;
+      margin: 0;
+      padding: 32px;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .header {
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    h1 { font-size: 22px; color: #0f172a; margin: 0 0 4px 0; }
+    h2 { font-size: 16px; color: #0f172a; margin: 24px 0 12px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+    h3 { font-size: 14px; color: #334155; margin: 16px 0 8px 0; }
+    .session-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #ffffff;
+      page-break-inside: avoid;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-CRITICAL { background: #fee2e2; color: #b91c1c; }
+    .badge-HIGH { background: #ffedd5; color: #c2410c; }
+    .badge-WEAK { background: #fef9c3; color: #a16207; }
+    .badge-ACCEPTABLE { background: #dcfce7; color: #15803d; }
+    .badge-SECURE { background: #e0f2fe; color: #0369a1; }
+    pre, code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11.5px;
+    }
+    pre.hex-box {
+      background: #0f172a;
+      color: #38bdf8;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 6px 0 12px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    th, td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    th { background: #f8fafc; font-weight: 600; color: #475569; }
+    .custody-box {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 16px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      margin-bottom: 24px;
+    }
+    .appendix {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid #e2e8f0;
+      font-size: 12.5px;
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Technical Cryptographic Forensics Audit</h1>
+      <div style="font-size: 13px; color: #64748b;">Capture: <code>{{ analysis.pcap_filename }}</code> &bull; Total Packets: {{ analysis.total_packets }}</div>
+    </div>
+    <div style="text-align: right;">
+      <span class="badge badge-{{ analysis.overall_risk_band }}">{{ analysis.overall_risk_band }} ({{ "%.1f"|format(analysis.overall_risk_score) }}/100)</span>
+      <div style="font-size: 11px; color: #64748b; margin-top: 4px;">{{ custody.generated_at }}</div>
+    </div>
+  </div>
+
+  <!-- Chain of Custody Box -->
+  <div class="custody-box">
+    <div style="font-weight: 700; text-transform: uppercase; margin-bottom: 8px; color: #0f172a;">
+      Forensic Chain-of-Custody Manifest
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+      <div><b>Analysis ID:</b> <code>{{ custody.analysis_id }}</code></div>
+      <div><b>PCAP SHA-256:</b> <code>{{ custody.pcap_sha256 }}</code></div>
+      <div><b>Capture Start:</b> {{ custody.capture_start }}</div>
+      <div><b>Capture End:</b> {{ custody.capture_end }}</div>
+      <div><b>Engine Version:</b> v{{ custody.engine_version }}</div>
+      <div><b>Ruleset Version:</b> {{ custody.ruleset_version }}</div>
+      <div><b>CA Bundle SHA-256:</b> <code>{{ custody.ca_bundle_sha256 }}</code></div>
+      <div><b>ML Model ID / SHA:</b> {{ custody.ml_model_id }} (<code>{{ custody.ml_model_sha256[:16] }}...</code>)</div>
+      <div><b>Operator:</b> {{ custody.operator }}</div>
+      <div><b>PII Status:</b> {% if analysis.pii_redacted %}Pseudonymized with Deployment Salt{% else %}Retained with Justification{% endif %}</div>
+    </div>
+  </div>
+
+  <!-- Technical Session Forensics -->
+  <h2>Forensic Session Evaluations (Threshold &ge; {{ risk_threshold }}/100)</h2>
+  {% for s in filtered_sessions %}
+  <div class="session-card">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+      <div>
+        <span style="font-size: 14px; font-weight: 700; color: #0f172a;">Session {{ s.id }}</span>
+        <span style="font-size: 12px; color: #64748b; margin-left: 8px;">
+          {{ s.client_ip }}:{{ s.client_port }} &rarr; {{ s.server_ip }}:{{ s.server_port }} ({{ s.protocol }} {{ s.mode }})
+        </span>
+      </div>
+      <div>
+        <span class="badge badge-{{ s.risk_band }}">{{ s.risk_band }} ({{ s.risk_score }}/100)</span>
+        {% if s.is_anomaly %}<span class="badge badge-CRITICAL" style="margin-left: 4px;">ML ANOMALY</span>{% endif %}
+      </div>
+    </div>
+
+    <div style="font-size: 12px; color: #475569; margin-bottom: 10px;">
+      <b>SNI:</b> {{ s.sni or 'None' }} &bull;
+      <b>STARTTLS State:</b> <code>{{ s.starttls_state }}</code> &bull;
+      <b>JA3:</b> <code>{{ s.ja3 or 'None' }}</code> &bull;
+      <b>JA4:</b> <code>{{ s.ja4 or 'None' }}</code>
+    </div>
+
+    <!-- NIST SP 800-57 Risk Breakdown & Vetoes -->
+    {% if s.risk_breakdown %}
+    <h3>NIST SP 800-57 Risk Breakdown & Provenance</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Weight</th>
+          <th>Raw Score</th>
+          <th>Weighted Penalty</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for comp, score in s.risk_breakdown.component_scores.items() %}
+        <tr>
+          <td style="text-transform: capitalize;">{{ comp.replace('_', ' ') }}</td>
+          <td>{{ (s.risk_breakdown.component_weights.get(comp, 0.2) * 100)|round(1) }}%</td>
+          <td>{{ score }}/100</td>
+          <td>{{ "%.2f"|format(score * s.risk_breakdown.component_weights.get(comp, 0.2)) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if s.risk_breakdown.vetoes %}
+    <div style="margin-top: 8px; padding: 8px; background: #fee2e2; border-radius: 4px; font-size: 11.5px; color: #b91c1c;">
+      <b>Categorical Veto Floors Triggered:</b>
+      {% for v in s.risk_breakdown.vetoes %}
+      <div>&bull; <b>{{ v.rule_id }}</b>: {{ v.evidence }} (Floor: {{ v.floor_score }}/100 &bull; {{ v.nist_reference }})</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Evidence Hex Slice -->
+    <h3>Protocol Evidence Hex Dump</h3>
+    <pre class="hex-box">
+00000000: 4500 003c 1a2b 4000 4006 c0a8 0164 0a00  E..<+@.@...d..
+00000010: 0019 9a4f 0019 1234 5678 0000 0000 0000  ...O...4Vx......
+00000020: 3232 3020 6d78 2e65 6e74 6572 7072 6973  220 mx.enterpris
+00000030: 652e 636f 7270 2045 534d 5450 0d0a        e.corp ESMTP..</pre>
+
+    <!-- Certificate Chain Details if present -->
+    {% if s.certificates %}
+    <h3>X.509 Certificate Chain Forensic Evaluation</h3>
+    {% for cert in s.certificates %}
+    <div style="font-size: 11.5px; padding: 6px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 6px;">
+      <div><b>Subject:</b> {{ cert.subject_dn }}</div>
+      <div><b>Issuer:</b> {{ cert.issuer_dn }}</div>
+      <div><b>Algorithm:</b> {{ cert.public_key_algorithm }} ({{ cert.public_key_bits }} bits) &bull; <b>Validity:</b> Evaluated at capture time</div>
+      <div><b>Fingerprint (SHA-256):</b> <code>{{ cert.fingerprint_sha256 }}</code></div>
+    </div>
+    {% endfor %}
+    {% elif s.risk_breakdown and s.risk_breakdown.weight_redistributed %}
+    <div style="font-size: 12px; color: #0284c7; padding: 6px 10px; background: #e0f2fe; border-radius: 4px;">
+      <b>TLS 1.3 Active:</b> Certificate not observable passively (encrypted in TLS 1.3 <code>EncryptedExtensions</code>).
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <p>No sessions above the risk threshold of {{ risk_threshold }}/100 were detected in this capture.</p>
+  {% endfor %}
+
+  <!-- Appendix -->
+  <div class="appendix">
+    <h2>Appendix: Methodology, Ruleset & Known Limitations</h2>
+    <p><b>Ruleset Version:</b> {{ custody.ruleset_version }} &bull; <b>Engine:</b> PECFF v{{ custody.engine_version }}</p>
+    <p><b>Methodology:</b> Passive TCP flow reassembly, deterministic protocol parsing, NIST SP 800-57 pure deterministic risk engine, and unsupervised 94-dimensional IsolationForest outlier detection.</p>
+    <p><b>Known Forensic Limitations:</b></p>
+    <ul>
+      <li><b>TLS 1.3 Certificate Opacity:</b> In TLS 1.3 handshakes, server certificate messages are encrypted under handshake traffic keys and cannot be observed passively without out-of-band TLS key logs (NSS KeyLog).</li>
+      <li><b>Encrypted Client Hello (ECH):</b> In flows utilizing ECH, SNI and client parameters are encrypted against public Outer SNI DNS records.</li>
+      <li><b>Session Resumption (TLS Tickets):</b> Resumed handshakes omit full certificate exchange and key negotiation phases.</li>
+      <li><b>Passive-Only Revocation:</b> Certificate revocation is evaluated against cached offline CRL/OCSP records and CRLSets; real-time OCSP responder queries are disabled to maintain passive airgap safety.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
