@@ -1,0 +1,13 @@
+{
+  "phase": "Phase 2 Smoke Test",
+  "target_sessions": 100,
+  "sessions_extracted": 100,
+  "feature_matrix_shape": [
+    100,
+    94
+  ],
+  "failed_pcaps": 0,
+  "elapsed_seconds": 87.47,
+  "parquet_path": "data\\datasets\\smoke_test\\features_94d.parquet",
+  "status": "PASSED"
+}

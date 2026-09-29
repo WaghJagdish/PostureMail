@@ -1,0 +1,5 @@
+{
+  "train_manifest_sha256": "7b86fe7a9afc41a5c5c9e0a39a8bd673324a9e24986bd627ead5a5b1cbdb2a2b",
+  "validation_manifest_sha256": "0b08d85705cb12c058d271001f2571810fe896d9c09de4e05971bc2c0ef4b928",
+  "test_manifest_sha256": "5f62a1fef2d127bcaa52120406af16d10a31d36372964d22f03e73c50c29bcb1"
+}

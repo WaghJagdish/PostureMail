@@ -20,6 +20,7 @@ interface SessionTableViewProps {
 
 const PRESETS = [
   { id: "all", label: "All Sessions" },
+  { id: "beacon_candidates", label: "Beacon Candidates", beacon: true },
   { id: "critical", label: "Critical Risk (≥80)", band: "CRITICAL" },
   { id: "stripping", label: "STARTTLS Stripped", state: "S_STRIP_DETECTED" },
   { id: "anomalies", label: "Anomalous Flows (ML)", anomaly: true },
@@ -52,6 +53,7 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
   const filteredSessions = useMemo(() => {
     return sessions.filter((s) => {
       // 1. Preset filter
+      if (selectedPreset === "beacon_candidates" && s.temporal_classification !== "BEACON_CANDIDATE") return false;
       if (selectedPreset === "critical" && s.risk_band !== "CRITICAL") return false;
       if (selectedPreset === "stripping" && s.starttls_state !== "S_STRIP_DETECTED") return false;
       if (selectedPreset === "anomalies" && !s.is_anomaly) return false;
@@ -218,7 +220,7 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "36px 140px 180px 180px 90px 110px 100px 90px 80px 50px",
+            gridTemplateColumns: "36px 130px 160px 160px 80px 100px 90px 120px 80px 70px 40px",
             background: "rgba(10, 14, 23, 0.8)",
             borderBottom: "1px solid var(--border-subtle)",
             padding: "8px 12px",
@@ -243,7 +245,8 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
           <div>Proto / Mode</div>
           <div>STARTTLS State</div>
           <div>Risk Score</div>
-          <div>Anomaly</div>
+          <div>Temporal Timing</div>
+          <div>ML (Exp)</div>
           <div>Bytes</div>
           <div style={{ textAlign: "right" }}>View</div>
         </div>
@@ -272,7 +275,7 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
                     height: `${virtualRow.size}px`,
                     transform: `translateY(${virtualRow.start}px)`,
                     display: "grid",
-                    gridTemplateColumns: "36px 140px 180px 180px 90px 110px 100px 90px 80px 50px",
+                    gridTemplateColumns: "36px 130px 160px 160px 80px 100px 90px 120px 80px 70px 40px",
                     alignItems: "center",
                     padding: "0 12px",
                     fontSize: 12,
@@ -329,12 +332,26 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
                   </div>
 
                   <div>
-                    {session.is_anomaly ? (
-                      <span className="badge badge-CRITICAL" style={{ fontSize: 10, padding: "1px 5px" }}>
-                        ANOMALOUS
+                    {session.temporal_classification === "BEACON_CANDIDATE" ? (
+                      <span className="badge badge-CRITICAL" style={{ fontSize: 9.5, padding: "1px 5px", background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", color: "#fca5a5" }}>
+                        BEACON
+                      </span>
+                    ) : session.temporal_classification === "SUSPICIOUS_TIMING" ? (
+                      <span className="badge badge-HIGH" style={{ fontSize: 9.5, padding: "1px 5px", background: "rgba(245, 158, 11, 0.2)", border: "1px solid #f59e0b", color: "#fcd34d" }}>
+                        SUSPICIOUS
                       </span>
                     ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 11 }}>Normal</span>
+                      <span style={{ color: "var(--text-muted)", fontSize: 10.5 }}>Normal</span>
+                    )}
+                  </div>
+
+                  <div>
+                    {session.is_anomaly ? (
+                      <span className="badge badge-WEAK" style={{ fontSize: 9.5, padding: "1px 5px", background: "rgba(168, 85, 247, 0.2)", color: "#d8b4fe" }}>
+                        Exp Outlier
+                      </span>
+                    ) : (
+                      <span style={{ color: "var(--text-muted)", fontSize: 10.5 }}>Inlier</span>
                     )}
                   </div>
 

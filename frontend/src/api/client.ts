@@ -88,11 +88,25 @@ export interface MLAnomalyResultSchema {
   is_anomaly: boolean;
   anomaly_score: number;
   anomaly_percentile: number;
+  is_experimental?: boolean;
   top_feature_explanations: Array<{
     feature: string;
     contribution: number;
     value?: number | string;
   }>;
+}
+
+export interface TemporalBehaviorSchema {
+  classification: "NORMAL" | "SUSPICIOUS_TIMING" | "BEACON_CANDIDATE" | "INSUFFICIENT_DATA" | string;
+  behavior_score: number;
+  mean_interval?: number | null;
+  std_interval?: number | null;
+  cv?: number | null;
+  jitter_pct?: number | null;
+  duration?: number;
+  event_count?: number;
+  explanation?: string[];
+  analyst_note?: string;
 }
 
 export interface FSMTransitionSchema {
@@ -110,6 +124,8 @@ export interface SessionDetailSchema extends SessionSummarySchema {
   ehlo_domain?: string | null;
   risk_breakdown?: RiskResultSchema;
   ml_result?: MLAnomalyResultSchema;
+  temporal_behavior?: TemporalBehaviorSchema;
+  temporal_classification?: string;
   certificates?: CertificateSchema[];
   findings?: FindingSchema[];
   fsm_transitions?: FSMTransitionSchema[];
@@ -478,6 +494,139 @@ export function generateMockAnalysis(analysisId: string = "analysis-1000-fixture
     });
   }
 
+  // Generate Temporal Beacon candidates and enrich sessions
+  const temporalGroups: Array<{
+    src_ip: string;
+    dst_ip: string;
+    dst_port: number;
+    protocol: string;
+    event_count: number;
+    mean_interval: number;
+    jitter_pct: number;
+    cv: number;
+    duration: number;
+    behavior_score: number;
+    classification: string;
+    explanation: string[];
+    analyst_note: string;
+  }> = [
+    {
+      src_ip: "10.0.1.15",
+      dst_ip: "198.51.100.44",
+      dst_port: 587,
+      protocol: "TCP",
+      event_count: 48,
+      mean_interval: 30.1,
+      jitter_pct: 2.8,
+      cv: 0.028,
+      duration: 1414.7,
+      behavior_score: 90,
+      classification: "BEACON_CANDIDATE",
+      explanation: [
+        "48 communication events observed (>= 5)",
+        "Mean recurrence period: 30.10s",
+        "Highly regular timing: Jitter is 2.80% (< 5%)",
+        "Low timing variance: Coefficient of variation is 0.0280 (< 0.15)",
+        "Observed communication persisted over 1414.7s (23.6 minutes)",
+      ],
+      analyst_note: "Regular automated communication pattern requiring investigation. Timing alone does not establish malicious activity.",
+    },
+    {
+      src_ip: "10.0.1.42",
+      dst_ip: "203.0.113.88",
+      dst_port: 465,
+      protocol: "TCP",
+      event_count: 31,
+      mean_interval: 60.8,
+      jitter_pct: 8.2,
+      cv: 0.082,
+      duration: 1824.0,
+      behavior_score: 90,
+      classification: "BEACON_CANDIDATE",
+      explanation: [
+        "31 communication events observed (>= 5)",
+        "Mean recurrence period: 60.80s",
+        "Regular timing: Jitter is 8.20% (< 15%)",
+        "Low timing variance: Coefficient of variation is 0.0820 (< 0.15)",
+        "Observed communication persisted over 1824.0s (30.4 minutes)",
+      ],
+      analyst_note: "Automated polling pattern candidate. Requires correlation with endpoint authorization.",
+    },
+    {
+      src_ip: "10.0.2.10",
+      dst_ip: "192.0.2.15",
+      dst_port: 25,
+      protocol: "TCP",
+      event_count: 7,
+      mean_interval: 13.4,
+      jitter_pct: 41.0,
+      cv: 0.41,
+      duration: 80.4,
+      behavior_score: 20,
+      classification: "NORMAL",
+      explanation: [
+        "7 communication events observed (>= 5)",
+        "Irregular timing: Jitter is 41.00% (>= 15%)",
+        "High timing variance: Coefficient of variation is 0.4100 (>= 0.15)",
+      ],
+      analyst_note: "Normal or irregular human/burst timing with no evidence of automated beaconing.",
+    },
+  ];
+
+  // Stamp temporal behaviors onto matching sessions
+  sessions.forEach((s, idx) => {
+    if (idx % 11 === 0) {
+      s.temporal_classification = "BEACON_CANDIDATE";
+      s.temporal_behavior = {
+        classification: "BEACON_CANDIDATE",
+        behavior_score: 90,
+        mean_interval: 30.1,
+        std_interval: 0.84,
+        cv: 0.028,
+        jitter_pct: 2.8,
+        duration: 1414.7,
+        event_count: 48,
+        explanation: [
+          "48 communication events observed",
+          "Mean interval: 30.1s",
+          "Jitter: 2.8%",
+          "Coefficient of variation: 0.028",
+          "Communication persisted for 23.6 minutes",
+          "Pattern is highly regular",
+        ],
+        analyst_note: "Regular automated communication pattern requiring investigation. Timing alone does not establish malicious activity.",
+      };
+    } else if (idx % 7 === 0) {
+      s.temporal_classification = "SUSPICIOUS_TIMING";
+      s.temporal_behavior = {
+        classification: "SUSPICIOUS_TIMING",
+        behavior_score: 50,
+        mean_interval: 45.2,
+        std_interval: 8.1,
+        cv: 0.18,
+        jitter_pct: 18.0,
+        duration: 450.0,
+        event_count: 10,
+        explanation: ["10 events observed", "Moderate timing regularity with jitter 18%"],
+        analyst_note: "Moderate timing regularity observed, but insufficient to confirm beacon candidate.",
+      };
+    } else {
+      s.temporal_classification = "NORMAL";
+    }
+  });
+
+  // Add temporal findings
+  findings.push({
+    id: `find-temporal-beacon-1`,
+    session_id: sessions[0]?.id || "sess-0001",
+    rule_id: "TEMPORAL_BEACON_CANDIDATE",
+    title: "Automated Timing Beacon Candidate (Behavioral)",
+    description: "Repeated communication pattern between 10.0.1.15 and 198.51.100.44:587 shows high timing regularity (mean interval=30.1s, jitter=2.8%, score=90/100 across 48 events). Requires investigation; timing alone does not establish malicious activity.",
+    severity: "MEDIUM",
+    standards_ref: "MITRE ATT&CK T1071 (Automated Timing)",
+    evidence: { ...temporalGroups[0] },
+  });
+
   const scores = sessions.map((s) => s.risk_score);
   const overallScore = Math.max(...scores);
   const overallBand = overallScore >= 80 ? "CRITICAL" : overallScore >= 60 ? "HIGH" : overallScore >= 40 ? "WEAK" : "SECURE";
@@ -496,6 +645,14 @@ export function generateMockAnalysis(analysisId: string = "analysis-1000-fixture
     summary_data: {
       session_count: sessions.length,
       findings_count: findings.length,
+      temporal_summary: {
+        analyzed_groups: 183,
+        beacon_candidates: 2,
+        suspicious_timing: 5,
+        insufficient_data: 31,
+        normal: 145,
+      },
+      temporal_groups: temporalGroups,
     },
     sessions,
     findings,

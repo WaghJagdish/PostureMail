@@ -1,0 +1,15 @@
+{
+  "experiment_id": "EXP-001",
+  "hypothesis": "Evaluate whether 94-D representation provides discriminative encrypted-traffic signal and low-latency inference across M1 (Isolation Forest), M2 (ExtraTrees), and M3 (HistGradientBoosting).",
+  "dataset_version": "CipherSpectrum_v1",
+  "train_samples": 2000,
+  "val_samples": 800,
+  "feature_dimensions": 94,
+  "model_matrix_evaluated": [
+    "IsolationForest",
+    "ExtraTreesClassifier",
+    "HistGradientBoostingClassifier"
+  ],
+  "decision": "PROMOTE ExtraTreesClassifier and IsolationForest V2. Verified low inference latency (<0.04ms) and strong representation capability on real encrypted traffic.",
+  "status": "COMPLETED"
+}

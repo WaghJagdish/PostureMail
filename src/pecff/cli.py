@@ -16,7 +16,9 @@ from pecff.api.schemas import (
     MLAnomalyResultSchema,
     RiskResultSchema,
     SessionDetailSchema,
+    TemporalBehaviorSchema,
 )
+from pecff.engine.temporal_detector import TemporalClassification, analyze_temporal_behavior
 from pecff.crypto.cipher_db import CipherDatabase, cipher_db
 from pecff.crypto.risk_engine import NISTDeterministicRiskScorer, SessionCryptoParameters
 from pecff.crypto.x509_parser import X509Parser
@@ -33,7 +35,11 @@ from pecff.parse.tls_decoder import (
 )
 from pecff.report.generator import ForensicReportGenerator
 from pecff.tasks.celery_app import get_preloaded_ml_model, get_preloaded_vectorizer
-from pecff.tasks.pipeline import NAMED_GROUP_MAP, resolve_protocol_version
+from pecff.tasks.pipeline import (
+    NAMED_GROUP_MAP,
+    resolve_protocol_version,
+    serialize_handshake_summary,
+)
 
 console = Console()
 
@@ -151,8 +157,8 @@ def analyze_command(pcap_path: Path, report_format: str, output_path: Path | Non
                         break
 
             # Session hygiene extension flags
-            sh_exts = tls_summary.server_hello.extensions if tls_summary.server_hello else {}
-            ch_exts = tls_summary.client_hello.extensions if tls_summary.client_hello else {}
+            sh_exts: dict[int, Any] = tls_summary.server_hello.extensions if tls_summary.server_hello else {}
+            ch_exts: dict[int, Any] = tls_summary.client_hello.extensions if tls_summary.client_hello else {}
             encrypt_then_mac = (22 in sh_exts) or (22 in ch_exts)
             extended_master_sec = (23 in sh_exts) or (23 in ch_exts)
             secure_reneg = (65281 in sh_exts) or (65281 in ch_exts)
@@ -314,12 +320,40 @@ def analyze_command(pcap_path: Path, report_format: str, output_path: Path | Non
                     "anomaly_percentile": float(
                         min(100.0, max(0.0, (anomaly_scores[i] + 0.5) * 100.0))
                     ),
-                    "top_feature_explanations": [],
+                    "top_feature_explanations": list[dict[str, Any]](),
+                    "is_experimental": True,
                 }
         except Exception as err:
             console.print(f"[yellow]ML Anomaly scoring warning:[/yellow] {err}")
     elif sessions_collected:
         console.print("[yellow]ML Anomaly scoring DEGRADED: Pre-trained model or vectorizer artifact unavailable.[/yellow]")
+
+    # Temporal behavioral analysis (§2, §16, §18)
+    temporal_res = analyze_temporal_behavior(sessions_collected)
+    session_temporal_map = temporal_res.get("session_enrichments", {})
+
+    for grp in temporal_res.get("groups", []):
+        if grp.get("classification") == TemporalClassification.BEACON_CANDIDATE.value:
+            sids = grp.get("session_ids", [])
+            primary_sid = sids[0] if sids else ""
+            findings_collected.append(
+                {
+                    "id": f"find-temporal-{len(findings_collected)}",
+                    "session_id": primary_sid,
+                    "rule_id": "TEMPORAL_BEACON_CANDIDATE",
+                    "title": "Automated Timing Beacon Candidate (Behavioral)",
+                    "description": (
+                        f"Repeated communication pattern between {grp.get('src_ip')} and "
+                        f"{grp.get('dst_ip')}:{grp.get('dst_port')} shows high timing regularity "
+                        f"(mean interval={grp.get('mean_interval')}s, jitter={grp.get('jitter_pct')}%, "
+                        f"CV={grp.get('cv')}, score={grp.get('behavior_score')}/100 across {grp.get('event_count')} events). "
+                        "Requires investigation; timing alone does not establish malicious activity."
+                    ),
+                    "severity": "MEDIUM",
+                    "standards_ref": "MITRE ATT&CK T1071",
+                    "evidence": grp,
+                }
+            )
 
     # Compute overall risk score
     scores = [s["risk_score"] for s in sessions_collected]
@@ -350,6 +384,8 @@ def analyze_command(pcap_path: Path, report_format: str, output_path: Path | Non
         summary_data={
             "session_count": len(sessions_collected),
             "findings_count": len(findings_collected),
+            "temporal_summary": temporal_res.get("summary", {}),
+            "temporal_groups": temporal_res.get("groups", []),
         },
         sessions=[
             SessionDetailSchema(
@@ -370,6 +406,17 @@ def analyze_command(pcap_path: Path, report_format: str, output_path: Path | Non
                 first_seen=s.get("first_seen", 0.0),
                 duration_sec=s.get("duration_sec", 0.0),
                 is_anomaly=s.get("is_anomaly", False),
+                temporal_classification=session_temporal_map.get(s["id"], {}).get("temporal_classification"),
+                temporal_behavior=TemporalBehaviorSchema(
+                    classification=session_temporal_map.get(s["id"], {}).get("temporal_classification", "INSUFFICIENT_DATA"),
+                    behavior_score=session_temporal_map.get(s["id"], {}).get("temporal_behavior_score", 0),
+                    mean_interval=session_temporal_map.get(s["id"], {}).get("temporal_mean_interval"),
+                    cv=session_temporal_map.get(s["id"], {}).get("temporal_cv"),
+                    jitter_pct=session_temporal_map.get(s["id"], {}).get("temporal_jitter_pct"),
+                    duration=session_temporal_map.get(s["id"], {}).get("temporal_duration", 0.0),
+                    event_count=session_temporal_map.get(s["id"], {}).get("temporal_event_count", 0),
+                    analyst_note=session_temporal_map.get(s["id"], {}).get("temporal_analyst_note", ""),
+                ) if s["id"] in session_temporal_map else None,
                 c2s_bytes=s.get("c2s_bytes", 0),
                 s2c_bytes=s.get("s2c_bytes", 0),
                 risk_breakdown=RiskResultSchema(**s["risk_breakdown"])

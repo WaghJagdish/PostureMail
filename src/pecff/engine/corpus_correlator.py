@@ -27,6 +27,11 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from pecff.config import settings
+from pecff.engine.temporal_detector import (
+    TemporalAnalysisResult,
+    TemporalClassification,
+    analyze_temporal_behavior,
+)
 from pecff.parse.downgrade_detectors import levenshtein_distance
 
 
@@ -59,6 +64,11 @@ class CorpusCorrelationResult:
     session_is_periodic: dict[str, bool] = field(default_factory=dict)
     session_src_count: dict[str, int] = field(default_factory=dict)
     session_distinct_sni: dict[str, int] = field(default_factory=dict)
+
+    # Temporal behavioral analysis result
+    temporal_summary: dict[str, Any] = field(default_factory=dict)
+    temporal_groups: list[dict[str, Any]] = field(default_factory=list)
+    session_temporal: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -407,14 +417,60 @@ def run_corpus_correlation(
     # CB4 - JA3 rarity
     result.new_findings.extend(_detect_ja3_rarity(sessions))
 
-    # Per-session auxiliary stats
+    # Per-session auxiliary stats (stamped on session_is_periodic, session_src_count, session_distinct_sni)
     src_counts, src_distinct_sni = _compute_src_statistics(sessions)
-
     for s in sessions:
         sid = s["id"]
         src = str(s.get("client_ip", ""))
         result.session_is_periodic[sid] = sid in periodic_ids
         result.session_src_count[sid] = src_counts.get(src, 1)
         result.session_distinct_sni[sid] = src_distinct_sni.get(src, 1)
+
+    # -----------------------------------------------------------------------
+    # Explainable Temporal Behavioral Detector (§2, §15, §18)
+    # -----------------------------------------------------------------------
+    temporal_res = analyze_temporal_behavior(sessions)
+    result.temporal_summary = temporal_res.get("summary", {})
+    result.temporal_groups = temporal_res.get("groups", [])
+    result.session_temporal = temporal_res.get("session_enrichments", {})
+
+    # Generate explainable BEACON_CANDIDATE findings without claiming maliciousness
+    for grp in result.temporal_groups:
+        if grp.get("classification") == TemporalClassification.BEACON_CANDIDATE.value:
+            sids = grp.get("session_ids", [])
+            primary_sid = sids[0] if sids else ""
+            result.new_findings.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "session_id": primary_sid,
+                    "rule_id": "TEMPORAL_BEACON_CANDIDATE",
+                    "title": "Automated Timing Beacon Candidate (Behavioral)",
+                    "description": (
+                        f"Repeated communication pattern between {grp.get('src_ip')} and "
+                        f"{grp.get('dst_ip')}:{grp.get('dst_port')} shows high timing regularity "
+                        f"(mean interval={grp.get('mean_interval')}s, jitter={grp.get('jitter_pct')}%, "
+                        f"CV={grp.get('cv')}, score={grp.get('behavior_score')}/100 across {grp.get('event_count')} events). "
+                        "Requires investigation; timing alone does not establish malicious activity."
+                    ),
+                    "severity": "MEDIUM",
+                    "standards_ref": "MITRE ATT&CK T1071 (Application Layer Protocol: Automated Timing)",
+                    "evidence": {
+                        "src_ip": grp.get("src_ip"),
+                        "dst_ip": grp.get("dst_ip"),
+                        "dst_port": grp.get("dst_port"),
+                        "protocol": grp.get("protocol"),
+                        "event_count": grp.get("event_count"),
+                        "mean_interval": grp.get("mean_interval"),
+                        "std_interval": grp.get("std_interval"),
+                        "cv": grp.get("cv"),
+                        "jitter_pct": grp.get("jitter_pct"),
+                        "duration": grp.get("duration"),
+                        "behavior_score": grp.get("behavior_score"),
+                        "classification": grp.get("classification"),
+                        "explanation": grp.get("explanation", []),
+                        "analyst_note": grp.get("analyst_note", ""),
+                    },
+                }
+            )
 
     return result

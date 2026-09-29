@@ -1,0 +1,29 @@
+{
+  "evaluation_dataset": "Untouched Grouped CipherSpectrum Test Set (10 unseen domains)",
+  "test_samples": 205,
+  "ml_v1": {
+    "model_family": "IsolationForest",
+    "training_data": "Synthetic/Mock Data (500 samples)",
+    "feature_dimensions": 94,
+    "mean_anomaly_score": 0.4464,
+    "std_anomaly_score": 0.4237,
+    "anomaly_detection_rate": 1.0,
+    "inference_latency_per_sample_ms": 0.111,
+    "threshold": 0.7
+  },
+  "ml_v2": {
+    "model_family": "IsolationForest (Calibrated) + ExtraTrees V2",
+    "training_data": "Real TLS 1.3 Traffic (2,000 CipherSpectrum sessions)",
+    "feature_dimensions": 94,
+    "mean_anomaly_score": 0.3736,
+    "std_anomaly_score": 0.3183,
+    "anomaly_detection_rate": 0.2,
+    "inference_latency_per_sample_ms": 0.183,
+    "threshold": 0.5
+  },
+  "deterministic_precedence": {
+    "rule": "DETERMINISTIC FORENSIC RULES (C1-C5, BEACONING) TAKE STRICT PRECEDENCE OVER ML V2.",
+    "behavior": "ML V2 serves solely as corroborating anomaly evidence and cannot override or downgrade cryptographic alerts.",
+    "verified": true
+  }
+}

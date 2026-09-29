@@ -31,6 +31,7 @@ from pecff.api.schemas import (
     MLAnomalyResultSchema,
     RiskResultSchema,
     SessionDetailSchema,
+    TemporalBehaviorSchema,
 )
 import struct
 from pecff.config import settings
@@ -591,23 +592,46 @@ def finalize_corpus_task(
         all_findings.extend(corpus_result.new_findings)
 
         # Stamp each session with corpus-computed auxiliary fields so that
-        # ml_scoring_task can use them when building the 94-dim feature vector.
+        # Stamp each session with corpus-computed auxiliary fields and temporal behavior
         for s in all_sessions:
             sid = s["id"]
             s["is_periodic"] = corpus_result.session_is_periodic.get(sid, False)
             s["src_session_count"] = corpus_result.session_src_count.get(sid, 1)
             s["distinct_sni_count"] = corpus_result.session_distinct_sni.get(sid, 1)
 
+            # Explainable temporal behavior (§2, §16, §17)
+            temp_data = corpus_result.session_temporal.get(sid)
+            if temp_data:
+                s["temporal_classification"] = temp_data.get("temporal_classification")
+                s["temporal_behavior"] = {
+                    "classification": temp_data.get("temporal_classification", "INSUFFICIENT_DATA"),
+                    "behavior_score": temp_data.get("temporal_behavior_score", 0),
+                    "mean_interval": temp_data.get("temporal_mean_interval"),
+                    "std_interval": None,
+                    "cv": temp_data.get("temporal_cv"),
+                    "jitter_pct": temp_data.get("temporal_jitter_pct"),
+                    "duration": temp_data.get("temporal_duration", 0.0),
+                    "event_count": temp_data.get("temporal_event_count", 0),
+                    "explanation": [],
+                    "analyst_note": temp_data.get("temporal_analyst_note", ""),
+                }
+            else:
+                s["temporal_classification"] = "INSUFFICIENT_DATA"
+                s["temporal_behavior"] = None
+
         corpus_beacon_count = len(corpus_result.beacon_groups)
+        temporal_summary = corpus_result.temporal_summary
 
         logger.info(
-            "Corpus correlation complete for %s: %d beacon groups, %d new findings",
+            "Corpus correlation complete for %s: %d beacon groups, %d temporal groups, %d new findings",
             analysis_id,
             corpus_beacon_count,
+            len(corpus_result.temporal_groups),
             len(corpus_result.new_findings),
         )
     except Exception as err:
         logger.warning("Corpus correlation error for %s: %s", analysis_id, err)
+        temporal_summary = {}
 
     # -----------------------------------------------------------------------
     # Overall risk aggregation
@@ -638,6 +662,8 @@ def finalize_corpus_task(
             "session_count": len(all_sessions),
             "findings_count": len(all_findings),
             "beacon_groups": corpus_beacon_count,
+            "temporal_summary": temporal_summary,
+            "temporal_groups": getattr(corpus_result, "temporal_groups", []),
         },
         "sessions": all_sessions,
         "findings": all_findings,
@@ -734,6 +760,7 @@ def ml_scoring_task(corpus_data: dict[str, Any]) -> dict[str, Any]:
                     min(100.0, max(0.0, (anomaly_scores[i] + 0.5) * 100.0))
                 ),
                 "top_feature_explanations": [],
+                "is_experimental": True,
             }
         logger.info(
             "ML anomaly scoring completed for %s: %d sessions, %d anomalies detected",
@@ -788,6 +815,10 @@ def index_and_persist_task(corpus_data: dict[str, Any]) -> str:
                 first_seen=s.get("first_seen", 0.0),
                 duration_sec=s.get("duration_sec", 0.0),
                 is_anomaly=s.get("is_anomaly", False),
+                temporal_classification=s.get("temporal_classification"),
+                temporal_behavior=TemporalBehaviorSchema(**s["temporal_behavior"])
+                if s.get("temporal_behavior")
+                else None,
                 c2s_bytes=s.get("c2s_bytes", 0),
                 s2c_bytes=s.get("s2c_bytes", 0),
                 risk_breakdown=RiskResultSchema(**s["risk_breakdown"])

@@ -184,6 +184,30 @@ class MLAnomalyResultSchema(BaseSchema):
     top_feature_explanations: list[dict[str, Any]] = Field(
         default_factory=list, description="Top contributing feature deviations."
     )
+    is_experimental: bool = Field(
+        default=True, description="Experimental flag indicating ML is isolated from primary verdict."
+    )
+
+
+class TemporalBehaviorSchema(BaseSchema):
+    """Explainable temporal beaconing and automated timing behavior candidate."""
+
+    classification: str = Field(
+        default="INSUFFICIENT_DATA",
+        description="Temporal classification: NORMAL, SUSPICIOUS_TIMING, BEACON_CANDIDATE, INSUFFICIENT_DATA.",
+    )
+    behavior_score: int = Field(default=0, ge=0, le=100, description="Temporal regularity score 0-100.")
+    mean_interval: float | None = Field(default=None, description="Mean recurrence period in seconds.")
+    std_interval: float | None = Field(default=None, description="Standard deviation of intervals in seconds.")
+    cv: float | None = Field(default=None, description="Coefficient of variation (std/mean).")
+    jitter_pct: float | None = Field(default=None, description="Jitter percentage.")
+    duration: float = Field(default=0.0, description="Observed communication duration in seconds.")
+    event_count: int = Field(default=0, description="Total observed communication events in group.")
+    explanation: list[str] = Field(default_factory=list, description="Step-by-step evidence reasons.")
+    analyst_note: str = Field(
+        default="",
+        description="Analyst context note emphasizing that timing alone does not establish malicious activity.",
+    )
 
 
 class SessionSummarySchema(BaseSchema):
@@ -206,6 +230,9 @@ class SessionSummarySchema(BaseSchema):
     first_seen: float = Field(description="First packet capture timestamp (epoch).")
     duration_sec: float = Field(description="TCP session duration in seconds.")
     is_anomaly: bool = Field(default=False, description="ML anomaly flag.")
+    temporal_classification: str | None = Field(
+        default=None, description="Temporal behavior classification: BEACON_CANDIDATE, SUSPICIOUS_TIMING, NORMAL, INSUFFICIENT_DATA."
+    )
 
 
 class SessionDetailSchema(SessionSummarySchema):
@@ -220,7 +247,10 @@ class SessionDetailSchema(SessionSummarySchema):
         default=None, description="Detailed risk audit."
     )
     ml_result: MLAnomalyResultSchema | None = Field(
-        default=None, description="ML anomaly breakdown."
+        default=None, description="ML anomaly breakdown (experimental)."
+    )
+    temporal_behavior: TemporalBehaviorSchema | None = Field(
+        default=None, description="Explainable temporal behavior evidence."
     )
     certificates: list[CertificateSchema] = Field(
         default_factory=list, description="Certificate chain."

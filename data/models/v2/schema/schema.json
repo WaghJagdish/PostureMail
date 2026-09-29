@@ -1,0 +1,1325 @@
+{
+  "schema_version": "2.0.0",
+  "total_dimensions": 94,
+  "feature_names_sha256": "106d6bb406e7f081f50801dbe106259b10e52b30fb5cc821a7c45f933999cdfd",
+  "source_manifest": "data/feature_manifest.json",
+  "source_extractor": "src/pecff/ml/features.py:SessionFeatureVectorizer",
+  "features": [
+    {
+      "feature_index": 0,
+      "feature_name": "fp_hash_00",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 00",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 1,
+      "feature_name": "fp_hash_01",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 01",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 2,
+      "feature_name": "fp_hash_02",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 02",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 3,
+      "feature_name": "fp_hash_03",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 03",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 4,
+      "feature_name": "fp_hash_04",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 04",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 5,
+      "feature_name": "fp_hash_05",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 05",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 6,
+      "feature_name": "fp_hash_06",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 06",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 7,
+      "feature_name": "fp_hash_07",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 07",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 8,
+      "feature_name": "fp_hash_08",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 08",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 9,
+      "feature_name": "fp_hash_09",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 09",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 10,
+      "feature_name": "fp_hash_10",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 10",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 11,
+      "feature_name": "fp_hash_11",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 11",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 12,
+      "feature_name": "fp_hash_12",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 12",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 13,
+      "feature_name": "fp_hash_13",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 13",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 14,
+      "feature_name": "fp_hash_14",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 14",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 15,
+      "feature_name": "fp_hash_15",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 15",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 16,
+      "feature_name": "fp_hash_16",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 16",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 17,
+      "feature_name": "fp_hash_17",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 17",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 18,
+      "feature_name": "fp_hash_18",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 18",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 19,
+      "feature_name": "fp_hash_19",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 19",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 20,
+      "feature_name": "fp_hash_20",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 20",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 21,
+      "feature_name": "fp_hash_21",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 21",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 22,
+      "feature_name": "fp_hash_22",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 22",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 23,
+      "feature_name": "fp_hash_23",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 23",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 24,
+      "feature_name": "fp_hash_24",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 24",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 25,
+      "feature_name": "fp_hash_25",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 25",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 26,
+      "feature_name": "fp_hash_26",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 26",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 27,
+      "feature_name": "fp_hash_27",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 27",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 28,
+      "feature_name": "fp_hash_28",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 28",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 29,
+      "feature_name": "fp_hash_29",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 29",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 30,
+      "feature_name": "fp_hash_30",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 30",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 31,
+      "feature_name": "fp_hash_31",
+      "semantic_block": "fingerprints",
+      "semantic_description": "HashingVectorizer L2-normalized token hash dimension 31",
+      "unit": "hash_bucket",
+      "feature_category": "numerical_bounded",
+      "missing_semantics": "zero",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 32,
+      "feature_name": "ciph_n_offered",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Number of non-GREASE ciphers offered by client",
+      "unit": "count",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_none",
+      "valid_range": [
+        0,
+        200
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 33,
+      "feature_name": "ciph_n_grease",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Number of GREASE ciphers offered by client",
+      "unit": "count",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_none",
+      "valid_range": [
+        0,
+        50
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 34,
+      "feature_name": "ciph_top1_id",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "IANA numerical ID of 1st offered cipher suite",
+      "unit": "iana_id",
+      "feature_category": "categorical_id",
+      "missing_semantics": "zero_if_absent",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 35,
+      "feature_name": "ciph_top2_id",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "IANA numerical ID of 2nd offered cipher suite",
+      "unit": "iana_id",
+      "feature_category": "categorical_id",
+      "missing_semantics": "zero_if_absent",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 36,
+      "feature_name": "ciph_top3_id",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "IANA numerical ID of 3rd offered cipher suite",
+      "unit": "iana_id",
+      "feature_category": "categorical_id",
+      "missing_semantics": "zero_if_absent",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 37,
+      "feature_name": "ciph_top4_id",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "IANA numerical ID of 4th offered cipher suite",
+      "unit": "iana_id",
+      "feature_category": "categorical_id",
+      "missing_semantics": "zero_if_absent",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 38,
+      "feature_name": "ciph_top5_id",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "IANA numerical ID of 5th offered cipher suite",
+      "unit": "iana_id",
+      "feature_category": "categorical_id",
+      "missing_semantics": "zero_if_absent",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 39,
+      "feature_name": "ciph_mean_strength",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Mean encryption bit strength of offered ciphers",
+      "unit": "bits",
+      "feature_category": "numerical_float",
+      "missing_semantics": "default_128",
+      "valid_range": [
+        0.0,
+        512.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 40,
+      "feature_name": "ciph_min_strength",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Minimum encryption bit strength among offered ciphers",
+      "unit": "bits",
+      "feature_category": "numerical_float",
+      "missing_semantics": "default_128",
+      "valid_range": [
+        0.0,
+        512.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 41,
+      "feature_name": "ciph_offers_3des",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Binary indicator if 3DES cipher is offered",
+      "unit": "binary_indicator",
+      "feature_category": "binary",
+      "missing_semantics": "zero_if_absent",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 42,
+      "feature_name": "ciph_offers_rc4",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Binary indicator if RC4 cipher is offered",
+      "unit": "binary_indicator",
+      "feature_category": "binary",
+      "missing_semantics": "zero_if_absent",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 43,
+      "feature_name": "ciph_offers_null",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Binary indicator if NULL encryption cipher is offered",
+      "unit": "binary_indicator",
+      "feature_category": "binary",
+      "missing_semantics": "zero_if_absent",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 44,
+      "feature_name": "ciph_pct_aead",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Percentage of offered ciphers using AEAD (GCM/CCM/CHACHA20)",
+      "unit": "ratio",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 45,
+      "feature_name": "ciph_pct_pfs",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Percentage of offered ciphers offering Perfect Forward Secrecy",
+      "unit": "ratio",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 46,
+      "feature_name": "ciph_list_entropy",
+      "semantic_block": "cipher_profile",
+      "semantic_description": "Shannon entropy of cipher families in ClientHello",
+      "unit": "bits",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        8.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 47,
+      "feature_name": "ext_bitmap_24",
+      "semantic_block": "extension_profile",
+      "semantic_description": "24-bit presence bitmap of standard TLS extensions",
+      "unit": "bitmask",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0,
+        16777215
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 48,
+      "feature_name": "ext_count",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Total count of non-GREASE TLS extensions present",
+      "unit": "count",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0,
+        100
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 49,
+      "feature_name": "ext_order_hash",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Normalized CRC32 wire order hash of TLS extensions",
+      "unit": "normalized_hash",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 50,
+      "feature_name": "ext_has_sni",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Binary indicator whether SNI extension was present",
+      "unit": "binary_indicator",
+      "feature_category": "binary",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 51,
+      "feature_name": "ext_sni_is_ip",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Binary indicator whether SNI hostname is a raw IP address",
+      "unit": "binary_indicator",
+      "feature_category": "binary",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 52,
+      "feature_name": "ext_sni_entropy",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Shannon entropy of the SNI domain name string",
+      "unit": "bits",
+      "feature_category": "numerical_float",
+      "missing_semantics": "nan_if_ech_or_absent",
+      "valid_range": [
+        0.0,
+        8.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 53,
+      "feature_name": "ext_sni_label_count",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Number of dot-separated DNS labels in SNI",
+      "unit": "count",
+      "feature_category": "numerical_float",
+      "missing_semantics": "nan_if_ech_or_absent",
+      "valid_range": [
+        0.0,
+        50.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 54,
+      "feature_name": "ext_has_alpn",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Binary indicator whether ALPN extension was negotiated/present",
+      "unit": "binary_indicator",
+      "feature_category": "binary",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 55,
+      "feature_name": "ext_alpn_hash",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Normalized CRC32 hash of ALPN protocol string",
+      "unit": "normalized_hash",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 56,
+      "feature_name": "ext_has_padding",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Binary indicator whether TLS padding extension was present",
+      "unit": "binary_indicator",
+      "feature_category": "binary",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 57,
+      "feature_name": "ext_padding_len",
+      "semantic_block": "extension_profile",
+      "semantic_description": "Length in bytes of TLS padding extension",
+      "unit": "bytes",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 58,
+      "feature_name": "crypto_selected_version",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Selected TLS protocol version (e.g. 772 for TLS 1.3)",
+      "unit": "protocol_version",
+      "feature_category": "categorical_id",
+      "missing_semantics": "zero_if_unnegotiated",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 59,
+      "feature_name": "crypto_selected_cipher",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Selected cipher suite IANA numerical ID",
+      "unit": "iana_id",
+      "feature_category": "categorical_id",
+      "missing_semantics": "zero_if_unnegotiated",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 60,
+      "feature_name": "crypto_kex_group",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Selected Key Exchange / NamedCurve group ID",
+      "unit": "group_id",
+      "feature_category": "categorical_id",
+      "missing_semantics": "zero_if_unnegotiated",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 61,
+      "feature_name": "crypto_pubkey_bits",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Server public key size in bits",
+      "unit": "bits",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_unnegotiated",
+      "valid_range": [
+        0,
+        16384
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 62,
+      "feature_name": "crypto_sig_alg",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Signature algorithm IANA ID",
+      "unit": "sig_id",
+      "feature_category": "categorical_id",
+      "missing_semantics": "zero_if_unnegotiated",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 63,
+      "feature_name": "crypto_cert_chain_len",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Number of certificates in the server certificate chain",
+      "unit": "count",
+      "feature_category": "numerical_float",
+      "missing_semantics": "nan_if_tls13_masked",
+      "valid_range": [
+        0.0,
+        50.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 64,
+      "feature_name": "crypto_cert_lifetime_days",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Server certificate validity period in days",
+      "unit": "days",
+      "feature_category": "numerical_float",
+      "missing_semantics": "nan_if_tls13_masked",
+      "valid_range": [
+        0.0,
+        36500.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 65,
+      "feature_name": "crypto_is_self_signed",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Binary indicator whether leaf certificate is self-signed",
+      "unit": "binary_indicator",
+      "feature_category": "binary_or_masked",
+      "missing_semantics": "nan_if_tls13_masked",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 66,
+      "feature_name": "crypto_san_count",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Number of Subject Alternative Names in server certificate",
+      "unit": "count",
+      "feature_category": "numerical_float",
+      "missing_semantics": "nan_if_tls13_masked",
+      "valid_range": [
+        0.0,
+        1000.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 67,
+      "feature_name": "crypto_risk_score",
+      "semantic_block": "crypto_params",
+      "semantic_description": "Deterministic cryptographic policy risk score (0-100)",
+      "unit": "risk_points",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0.0,
+        100.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 68,
+      "feature_name": "meta_client_hello_len",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Wire length in bytes of ClientHello message",
+      "unit": "bytes",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 69,
+      "feature_name": "meta_server_hello_len",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Wire length in bytes of ServerHello message",
+      "unit": "bytes",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 70,
+      "feature_name": "meta_total_hs_bytes",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Cumulative byte count across all handshake packets",
+      "unit": "bytes",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0,
+        1000000
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 71,
+      "feature_name": "meta_n_hs_packets",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Total count of TCP packets involved in handshake",
+      "unit": "count",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0,
+        1000
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 72,
+      "feature_name": "meta_pkt_size_mean",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Mean packet size during handshake exchange",
+      "unit": "bytes",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        65535.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 73,
+      "feature_name": "meta_pkt_size_std",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Standard deviation of packet sizes during handshake",
+      "unit": "bytes",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0.0,
+        65535.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 74,
+      "feature_name": "meta_pkt_size_min",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Minimum packet size observed in handshake",
+      "unit": "bytes",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 75,
+      "feature_name": "meta_pkt_size_max",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Maximum packet size observed in handshake",
+      "unit": "bytes",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_if_empty",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 76,
+      "feature_name": "meta_iat_mean",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Mean inter-arrival time between handshake packets",
+      "unit": "seconds",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_single_pkt",
+      "valid_range": [
+        0.0,
+        3600.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 77,
+      "feature_name": "meta_iat_std",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Standard deviation of inter-arrival times",
+      "unit": "seconds",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_single_pkt",
+      "valid_range": [
+        0.0,
+        3600.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 78,
+      "feature_name": "meta_iat_min",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Minimum inter-arrival time between packets",
+      "unit": "seconds",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_single_pkt",
+      "valid_range": [
+        0.0,
+        3600.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 79,
+      "feature_name": "meta_iat_max",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Maximum inter-arrival time between packets",
+      "unit": "seconds",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_if_single_pkt",
+      "valid_range": [
+        0.0,
+        3600.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 80,
+      "feature_name": "meta_rtt_estimate_ms",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Estimated round-trip time from SYN/SYN-ACK handshake",
+      "unit": "milliseconds",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0.0,
+        100000.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 81,
+      "feature_name": "meta_hs_duration_ms",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Total handshake duration in milliseconds",
+      "unit": "milliseconds",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0.0,
+        600000.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 82,
+      "feature_name": "meta_tcp_retrans_count",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Count of TCP retransmissions observed in session",
+      "unit": "count",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0,
+        10000
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 83,
+      "feature_name": "meta_tcp_overlap_count",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Count of TCP packet segment overlaps observed",
+      "unit": "count",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0,
+        10000
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 84,
+      "feature_name": "meta_ttl_client",
+      "semantic_block": "session_metadata",
+      "semantic_description": "Observed client IP packet Time-To-Live value",
+      "unit": "hops",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0,
+        255
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 85,
+      "feature_name": "meta_tcp_window_scale",
+      "semantic_block": "session_metadata",
+      "semantic_description": "TCP window scale option value",
+      "unit": "scale_factor",
+      "feature_category": "numerical_int",
+      "missing_semantics": "minus_one_if_absent",
+      "valid_range": [
+        -1,
+        14
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 86,
+      "feature_name": "beh_starttls_state",
+      "semantic_block": "behavioral",
+      "semantic_description": "SMTP/IMAP STARTTLS protocol negotiation state enum",
+      "unit": "state_enum",
+      "feature_category": "categorical_enum",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0.0,
+        4.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 87,
+      "feature_name": "beh_sessions_from_src",
+      "semantic_block": "behavioral",
+      "semantic_description": "Cumulative historical sessions originating from this client IP",
+      "unit": "count",
+      "feature_category": "numerical_int",
+      "missing_semantics": "one_default",
+      "valid_range": [
+        0,
+        1000000
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 88,
+      "feature_name": "beh_distinct_sni_per_src",
+      "semantic_block": "behavioral",
+      "semantic_description": "Count of distinct SNI hostnames queried by this client IP",
+      "unit": "count",
+      "feature_category": "numerical_int",
+      "missing_semantics": "one_default",
+      "valid_range": [
+        0,
+        100000
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 89,
+      "feature_name": "beh_dst_port",
+      "semantic_block": "behavioral",
+      "semantic_description": "Destination TCP port of session",
+      "unit": "port_number",
+      "feature_category": "numerical_int",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0,
+        65535
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 90,
+      "feature_name": "beh_port_is_standard_mail",
+      "semantic_block": "behavioral",
+      "semantic_description": "Binary indicator if dst_port matches standard mail/TLS ports",
+      "unit": "binary_indicator",
+      "feature_category": "binary",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 91,
+      "feature_name": "beh_bytes_up_down_ratio",
+      "semantic_block": "behavioral",
+      "semantic_description": "Ratio of client-to-server bytes vs server-to-client bytes",
+      "unit": "ratio",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0.0,
+        1000000.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 92,
+      "feature_name": "beh_session_duration_s",
+      "semantic_block": "behavioral",
+      "semantic_description": "Total TCP session duration in seconds",
+      "unit": "seconds",
+      "feature_category": "numerical_float",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0.0,
+        864000.0
+      ],
+      "dtype": "float32"
+    },
+    {
+      "feature_index": 93,
+      "feature_name": "beh_is_periodic",
+      "semantic_block": "behavioral",
+      "semantic_description": "Binary indicator if session matches periodic beaconing intervals",
+      "unit": "binary_indicator",
+      "feature_category": "binary",
+      "missing_semantics": "zero_default",
+      "valid_range": [
+        0.0,
+        1.0
+      ],
+      "dtype": "float32"
+    }
+  ]
+}

@@ -13,6 +13,7 @@ import {
   Send,
   Eye,
   Layers,
+  Radio,
 } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { SessionDetailSchema, submitAnalystVerdict, AnalystVerdictCreate } from "../../api/client";
@@ -128,8 +129,21 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
               <span className={`badge badge-${session.risk_band}`}>
                 {session.risk_band} RISK ({session.risk_score.toFixed(0)}/100)
               </span>
+              {session.temporal_classification === "BEACON_CANDIDATE" && (
+                <span className="badge badge-CRITICAL" style={{ background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", color: "#fca5a5" }}>
+                  <Radio size={12} style={{ display: "inline", marginRight: 4 }} />
+                  BEACON CANDIDATE
+                </span>
+              )}
+              {session.temporal_classification === "SUSPICIOUS_TIMING" && (
+                <span className="badge badge-HIGH" style={{ background: "rgba(245, 158, 11, 0.2)", border: "1px solid #f59e0b", color: "#fcd34d" }}>
+                  SUSPICIOUS TIMING
+                </span>
+              )}
               {session.is_anomaly && (
-                <span className="badge badge-CRITICAL">ML ANOMALOUS FLOW</span>
+                <span className="badge badge-WEAK" style={{ background: "rgba(168, 85, 247, 0.2)", border: "1px solid #a855f7", color: "#d8b4fe" }}>
+                  EXPERIMENTAL ML ANOMALY
+                </span>
               )}
             </div>
             <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 6, display: "flex", gap: 16 }}>
@@ -366,14 +380,97 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
         </div>
       </div>
 
-      {/* Row 3: ML Anomaly Panel & Analyst Verdict Action */}
+      {/* Row 3: Behavioral Temporal Analysis & Experimental ML Anomaly Panel */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-        {/* ML Anomaly Panel */}
+        {/* Behavioral Temporal Detector Card (§2, §16, §18) */}
         <div className="card" style={{ padding: 18 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-            <Cpu size={16} color="#a855f7" />
-            Unsupervised ML Anomaly Engine (94-Dim IsolationForest)
-          </h3>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
+              <Radio size={16} color="#38bdf8" />
+              Behavioral Temporal Timing Evidence
+            </h3>
+            <span
+              className={`badge badge-${
+                session.temporal_classification === "BEACON_CANDIDATE"
+                  ? "CRITICAL"
+                  : session.temporal_classification === "SUSPICIOUS_TIMING"
+                  ? "HIGH"
+                  : "LOW"
+              }`}
+              style={{ fontSize: 10 }}
+            >
+              {session.temporal_classification || "INSUFFICIENT_DATA"}
+            </span>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 12 }}>
+            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Mean Period</div>
+              <div className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#38bdf8" }}>
+                {session.temporal_behavior?.mean_interval !== null && session.temporal_behavior?.mean_interval !== undefined
+                  ? `${session.temporal_behavior.mean_interval}s`
+                  : "N/A"}
+              </div>
+            </div>
+            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Jitter (%)</div>
+              <div
+                className="font-mono"
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color:
+                    session.temporal_behavior?.jitter_pct !== null && session.temporal_behavior?.jitter_pct !== undefined
+                      ? session.temporal_behavior.jitter_pct < 15
+                        ? "#f87171"
+                        : "#10b981"
+                      : "var(--text-muted)",
+                }}
+              >
+                {session.temporal_behavior?.jitter_pct !== null && session.temporal_behavior?.jitter_pct !== undefined
+                  ? `${session.temporal_behavior.jitter_pct}%`
+                  : "N/A"}
+              </div>
+            </div>
+            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>CoV</div>
+              <div className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#10b981" }}>
+                {session.temporal_behavior?.cv !== null && session.temporal_behavior?.cv !== undefined
+                  ? session.temporal_behavior.cv
+                  : "N/A"}
+              </div>
+            </div>
+            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Score</div>
+              <div
+                className="font-mono"
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: (session.temporal_behavior?.behavior_score || 0) >= 70 ? "#ef4444" : "#f59e0b",
+                }}
+              >
+                {session.temporal_behavior?.behavior_score ?? 0}/100
+              </div>
+            </div>
+          </div>
+
+          <div style={{ background: "rgba(30, 41, 59, 0.4)", borderRadius: 6, padding: "8px 12px", borderLeft: "3px solid #38bdf8", fontSize: 11.5, color: "#cbd5e1", lineHeight: 1.5 }}>
+            <strong>Note:</strong> {session.temporal_behavior?.analyst_note || "Behavioral beacon detector evaluates timing regularity across matching endpoints. Timing alone does not prove malicious intent."}
+          </div>
+        </div>
+
+        {/* ML Anomaly Panel (Marked Experimental and Isolated from Primary Verdict) */}
+        <div className="card" style={{ padding: 18 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
+              <Cpu size={16} color="#a855f7" />
+              Machine Learning Model (Experimental)
+            </h3>
+            <span style={{ fontSize: 10, color: "#d8b4fe", background: "rgba(168, 85, 247, 0.15)", border: "1px solid rgba(168, 85, 247, 0.3)", borderRadius: 4, padding: "2px 6px" }}>
+              Isolated from Verdict
+            </span>
+          </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 14 }}>
             <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
@@ -389,8 +486,8 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
               </div>
             </div>
             <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
-              <div style={{ fontSize: 10.5, color: "var(--text-muted)" }}>Model Agreement</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#10b981" }}>IF + OCSVM (98%)</div>
+              <div style={{ fontSize: 10.5, color: "var(--text-muted)" }}>Model Status</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#a855f7" }}>Experimental</div>
             </div>
           </div>
 
@@ -409,7 +506,10 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
 
+      {/* Row 4: Analyst Verdict Action */}
+      <div style={{ marginBottom: 16 }}>
         {/* Analyst Verdict Control */}
         <div className="card" style={{ padding: 18 }}>
           <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>

@@ -1,0 +1,106 @@
+{
+  "frozen_threshold": 0.5,
+  "decision_rule": "predict_anomaly_if_prob >= 0.5",
+  "operational_objective": "maximize precision subject to recall >= 0.80",
+  "threshold_grid_analysis": [
+    {
+      "threshold": 0.1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.325,
+      "tp": 0,
+      "fp": 260,
+      "tn": 540,
+      "fn": 0
+    },
+    {
+      "threshold": 0.2,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0625,
+      "tp": 0,
+      "fp": 50,
+      "tn": 750,
+      "fn": 0
+    },
+    {
+      "threshold": 0.3,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0275,
+      "tp": 0,
+      "fp": 22,
+      "tn": 778,
+      "fn": 0
+    },
+    {
+      "threshold": 0.4,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0087,
+      "tp": 0,
+      "fp": 7,
+      "tn": 793,
+      "fn": 0
+    },
+    {
+      "threshold": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0037,
+      "tp": 0,
+      "fp": 3,
+      "tn": 797,
+      "fn": 0
+    },
+    {
+      "threshold": 0.6,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0012,
+      "tp": 0,
+      "fp": 1,
+      "tn": 799,
+      "fn": 0
+    },
+    {
+      "threshold": 0.7,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0012,
+      "tp": 0,
+      "fp": 1,
+      "tn": 799,
+      "fn": 0
+    },
+    {
+      "threshold": 0.8,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0012,
+      "tp": 0,
+      "fp": 1,
+      "tn": 799,
+      "fn": 0
+    },
+    {
+      "threshold": 0.9,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "fpr": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "tn": 800,
+      "fn": 0
+    }
+  ]
+}
