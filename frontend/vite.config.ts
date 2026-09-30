@@ -21,6 +21,10 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    host: "0.0.0.0",
+    allowedHosts: ["posturemail-frontend-fixed.onrender.com"],
+  },
   test: {
     globals: true,
     environment: "jsdom",
