@@ -1,13 +1,9 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  Search,
-  Download,
-  CheckSquare,
-  Square,
-  ChevronRight,
-} from "lucide-react";
+import { Search, Download, CheckSquare, Square, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { SessionDetailSchema } from "../../api/client";
+import { IndustrialCard } from "../common/IndustrialCard";
+import { TactileButton } from "../common/TactileButton";
 
 interface SessionTableViewProps {
   sessions: SessionDetailSchema[];
@@ -19,13 +15,12 @@ interface SessionTableViewProps {
 }
 
 const PRESETS = [
-  { id: "all", label: "All Sessions" },
-  { id: "beacon_candidates", label: "Beacon Candidates", beacon: true },
-  { id: "critical", label: "Critical Risk (≥80)", band: "CRITICAL" },
-  { id: "stripping", label: "STARTTLS Stripped", state: "S_STRIP_DETECTED" },
-  { id: "anomalies", label: "Anomalous Flows (ML)", anomaly: true },
-  { id: "weak_kex", label: "Weak / Static RSA", cipher: "RSA" },
-  { id: "tls13", label: "TLS 1.3 Only", tls13: true },
+  { id: "all", label: "ALL TRAFFIC" },
+  { id: "critical", label: "CRITICAL RISK" },
+  { id: "stripping", label: "STARTTLS STRIPPED" },
+  { id: "anomalies", label: "ML ANOMALIES" },
+  { id: "beacon_candidates", label: "BEACON SIGNALS" },
+  { id: "weak_kex", label: "WEAK KEX" },
 ];
 
 export const SessionTableView: React.FC<SessionTableViewProps> = ({
@@ -44,229 +39,183 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // Sync external search updates from chart clicks
-  useEffect(() => {
-    if (externalSearch) setSearch(externalSearch);
-  }, [externalSearch]);
+  useEffect(() => { if (externalSearch) setSearch(externalSearch); }, [externalSearch]);
 
-  // Filter sessions
+  // Filter
   const filteredSessions = useMemo(() => {
     return sessions.filter((s) => {
-      // 1. Preset filter
       if (selectedPreset === "beacon_candidates" && s.temporal_classification !== "BEACON_CANDIDATE") return false;
       if (selectedPreset === "critical" && s.risk_band !== "CRITICAL") return false;
       if (selectedPreset === "stripping" && s.starttls_state !== "S_STRIP_DETECTED") return false;
       if (selectedPreset === "anomalies" && !s.is_anomaly) return false;
       if (selectedPreset === "weak_kex" && !s.risk_breakdown?.component_scores?.key_exchange) return false;
-      if (selectedPreset === "tls13" && !s.risk_breakdown?.weight_redistributed) return false;
-
-      // 2. Text Search
       if (search.trim()) {
         const q = search.toLowerCase();
-        const matches =
-          s.id.toLowerCase().includes(q) ||
-          s.client_ip.toLowerCase().includes(q) ||
-          s.server_ip.toLowerCase().includes(q) ||
-          (s.sni && s.sni.toLowerCase().includes(q)) ||
-          s.protocol.toLowerCase().includes(q) ||
-          s.risk_band.toLowerCase().includes(q) ||
-          (s.ja3 && s.ja3.toLowerCase().includes(q)) ||
-          (s.ja4 && s.ja4.toLowerCase().includes(q)) ||
-          s.starttls_state.toLowerCase().includes(q);
-        if (!matches) return false;
+        return (
+          s.id.toLowerCase().includes(q) || s.client_ip.toLowerCase().includes(q) ||
+          s.server_ip.toLowerCase().includes(q) || (s.sni && s.sni.toLowerCase().includes(q)) ||
+          s.protocol.toLowerCase().includes(q) || s.risk_band.toLowerCase().includes(q) ||
+          (s.ja3 && s.ja3.toLowerCase().includes(q)) || s.starttls_state.toLowerCase().includes(q)
+        );
       }
-
       return true;
     });
   }, [sessions, selectedPreset, search]);
 
-  // Virtualizer for 60fps high performance at 10,000 rows
   const rowVirtualizer = useVirtualizer({
     count: filteredSessions.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 40,
+    estimateSize: () => 44,
     overscan: 20,
   });
 
-  // Keyboard navigation (j/k, Enter, v, /)
+  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        if (e.key === "Escape") {
-          (e.target as HTMLElement).blur();
-        }
+        if (e.key === "Escape") (e.target as HTMLElement).blur();
         return;
       }
-
-      if (e.key === "j" || e.key === "ArrowDown") {
-        e.preventDefault();
-        setFocusedIndex((prev) => Math.min(filteredSessions.length - 1, prev + 1));
-      } else if (e.key === "k" || e.key === "ArrowUp") {
-        e.preventDefault();
-        setFocusedIndex((prev) => Math.max(0, prev - 1));
-      } else if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        if (filteredSessions[focusedIndex]) {
-          onSelectSession(filteredSessions[focusedIndex]);
-        }
-      } else if (e.key === "/") {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      } else if (e.key === "v") {
-        e.preventDefault();
-        if (filteredSessions[focusedIndex]) {
-          onOpenVerdict(filteredSessions[focusedIndex].id);
-        }
-      }
+      if (e.key === "j" || e.key === "ArrowDown") { e.preventDefault(); setFocusedIndex((p) => Math.min(filteredSessions.length - 1, p + 1)); }
+      else if (e.key === "k" || e.key === "ArrowUp") { e.preventDefault(); setFocusedIndex((p) => Math.max(0, p - 1)); }
+      else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (filteredSessions[focusedIndex]) onSelectSession(filteredSessions[focusedIndex]); }
+      else if (e.key === "/") { e.preventDefault(); searchInputRef.current?.focus(); }
+      else if (e.key === "v") { e.preventDefault(); if (filteredSessions[focusedIndex]) onOpenVerdict(filteredSessions[focusedIndex].id); }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [filteredSessions, focusedIndex, onSelectSession, onOpenVerdict]);
 
-  // Bulk Selection Handlers
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredSessions.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filteredSessions.map((s) => s.id)));
-    }
+    setSelectedIds(selectedIds.size === filteredSessions.length ? new Set() : new Set(filteredSessions.map((s) => s.id)));
   };
-
   const toggleSelectOne = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const next = new Set(selectedIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
+    next.has(id) ? next.delete(id) : next.add(id);
     setSelectedIds(next);
   };
 
   const exportSelectedAsJSON = () => {
-    const targetSessions = selectedIds.size > 0 ? sessions.filter((s) => selectedIds.has(s.id)) : filteredSessions;
-    const blob = new Blob([JSON.stringify(targetSessions, null, 2)], { type: "application/json" });
+    const targets = selectedIds.size > 0 ? sessions.filter((s) => selectedIds.has(s.id)) : filteredSessions;
+    const blob = new Blob([JSON.stringify(targets, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
-    a.download = `pecff_sessions_export_${Date.now()}.json`;
-    a.click();
+    a.href = url; a.download = `pecff_sessions_${Date.now()}.json`; a.click();
     URL.revokeObjectURL(url);
   };
 
+  const COLS = "36px 115px 165px 165px 85px 105px 120px 95px 75px 36px";
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 135px)", margin: "0 16px" }}>
-      {/* Top Filter & Action Bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12 }}>
-        {/* Presets */}
-        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+
+      {/* ── Switchboard Control Toolbar ── */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          marginBottom: 16,
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Preset Selector Keys */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {PRESETS.map((p) => {
-            const isSelected = selectedPreset === p.id;
+            const active = selectedPreset === p.id;
             return (
-              <button
+              <TactileButton
                 key={p.id}
+                size="sm"
+                variant={active ? "recessed" : "chassis"}
+                active={active}
                 onClick={() => setSelectedPreset(p.id)}
-                style={{
-                  padding: "5px 11px",
-                  borderRadius: 6,
-                  fontSize: 12,
-                  fontWeight: isSelected ? 600 : 500,
-                  background: isSelected ? "rgba(56, 189, 248, 0.15)" : "rgba(30, 41, 59, 0.5)",
-                  color: isSelected ? "#38bdf8" : "var(--text-secondary)",
-                  border: `1px solid ${isSelected ? "rgba(56, 189, 248, 0.4)" : "var(--border-subtle)"}`,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  transition: "all 0.15s ease",
-                }}
+                style={{ padding: "6px 12px", fontSize: 10.5 }}
               >
                 {p.label}
-              </button>
+              </TactileButton>
             );
           })}
         </div>
 
-        {/* Search & Actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {/* Search Slot + Export Latch */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ position: "relative" }}>
-            <Search size={14} color="#64748b" style={{ position: "absolute", left: 9, top: 8 }} />
+            <Search size={13} color="var(--text-muted)" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
             <input
               ref={searchInputRef}
               type="search"
-              placeholder="Filter sessions [/]..."
+              className="data-slot-input"
+              placeholder="FILTER SWITCHBOARD [/]..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: 28, width: 220, fontSize: 12 }}
+              style={{ paddingLeft: 34, width: 240, fontSize: 11.5 }}
             />
           </div>
 
-          <button onClick={exportSelectedAsJSON} className="btn btn-secondary btn-sm" style={{ gap: 5 }}>
-            <Download size={13} />
-            <span>Export ({selectedIds.size || filteredSessions.length})</span>
-          </button>
+          <TactileButton
+            variant="chassis"
+            size="sm"
+            onClick={exportSelectedAsJSON}
+            icon={<Download size={13} />}
+          >
+            EXPORT ({selectedIds.size || filteredSessions.length})
+          </TactileButton>
         </div>
       </div>
 
-      {/* Table Container with Virtualization */}
-      <div
-        className="card"
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          background: "rgba(17, 24, 39, 0.8)",
-          backdropFilter: "blur(10px)",
-        }}
+      {/* ── Virtualized Switchboard Frame ── */}
+      <IndustrialCard
+        elevation="base"
+        bolted={true}
+        vents={true}
+        tag="RECONSTRUCTED WIRE STREAMS · VIRTUAL BUS"
+        style={{ flex: 1, display: "flex", flexDirection: "column", padding: 0, overflow: "hidden" }}
       >
-        {/* Table Header */}
+        {/* Table Header Bar */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "36px 130px 160px 160px 80px 100px 90px 120px 80px 70px 40px",
-            background: "rgba(10, 14, 23, 0.8)",
-            borderBottom: "1px solid var(--border-subtle)",
-            padding: "8px 12px",
-            fontSize: 11,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            color: "var(--text-muted)",
-            letterSpacing: "0.04em",
-            userSelect: "none",
+            gridTemplateColumns: COLS,
+            background: "var(--chassis)",
+            borderBottom: "2px solid #babecc",
+            padding: "0 18px",
+            height: 42,
+            alignItems: "center",
+            flexShrink: 0,
           }}
         >
           <div onClick={toggleSelectAll} style={{ cursor: "pointer", display: "flex", alignItems: "center" }}>
-            {selectedIds.size === filteredSessions.length && filteredSessions.length > 0 ? (
-              <CheckSquare size={14} color="#38bdf8" />
-            ) : (
-              <Square size={14} color="#64748b" />
-            )}
+            {selectedIds.size === filteredSessions.length && filteredSessions.length > 0
+              ? <CheckSquare size={14} color="var(--accent)" />
+              : <Square size={14} color="#babecc" />}
           </div>
-          <div>Session ID</div>
-          <div>Client Endpoint</div>
-          <div>Server / SNI</div>
-          <div>Proto / Mode</div>
-          <div>STARTTLS State</div>
-          <div>Risk Score</div>
-          <div>Temporal Timing</div>
-          <div>ML (Exp)</div>
-          <div>Bytes</div>
-          <div style={{ textAlign: "right" }}>View</div>
+          <div className="stamped-label" style={{ fontSize: 9.5 }}>STREAM ID</div>
+          <div className="stamped-label" style={{ fontSize: 9.5 }}>CLIENT ORIGIN</div>
+          <div className="stamped-label" style={{ fontSize: 9.5 }}>SERVER / SNI</div>
+          <div className="stamped-label" style={{ fontSize: 9.5 }}>PROTOCOL</div>
+          <div className="stamped-label" style={{ fontSize: 9.5 }}>STARTTLS</div>
+          <div className="stamped-label" style={{ fontSize: 9.5 }}>NIST RISK</div>
+          <div className="stamped-label" style={{ fontSize: 9.5 }}>TEMPORAL</div>
+          <div className="stamped-label" style={{ fontSize: 9.5 }}>PAYLOAD</div>
+          <div />
         </div>
 
         {/* Virtualized Rows */}
         <div ref={parentRef} style={{ flex: 1, overflowY: "auto", position: "relative" }}>
           <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: "100%", position: "relative" }}>
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const session = filteredSessions[virtualRow.index];
-              const isSelected = selectedSessionId === session.id;
-              const isChecked = selectedIds.has(session.id);
+              const s = filteredSessions[virtualRow.index];
+              const isSelected = selectedSessionId === s.id;
               const isFocused = focusedIndex === virtualRow.index;
+              const isChecked = selectedIds.has(s.id);
 
               return (
                 <div
-                  key={session.id}
-                  onClick={() => {
-                    setFocusedIndex(virtualRow.index);
-                    onSelectSession(session);
-                  }}
+                  key={s.id}
+                  onClick={() => { setFocusedIndex(virtualRow.index); onSelectSession(s); }}
                   style={{
                     position: "absolute",
                     top: 0,
@@ -275,92 +224,94 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
                     height: `${virtualRow.size}px`,
                     transform: `translateY(${virtualRow.start}px)`,
                     display: "grid",
-                    gridTemplateColumns: "36px 130px 160px 160px 80px 100px 90px 120px 80px 70px 40px",
+                    gridTemplateColumns: COLS,
                     alignItems: "center",
-                    padding: "0 12px",
-                    fontSize: 12,
-                    borderBottom: "1px solid rgba(255, 255, 255, 0.03)",
-                    background: isSelected
-                      ? "rgba(56, 189, 248, 0.12)"
-                      : isFocused
-                      ? "rgba(255, 255, 255, 0.04)"
-                      : virtualRow.index % 2 === 0
-                      ? "rgba(0, 0, 0, 0.15)"
-                      : "transparent",
+                    padding: "0 18px",
                     cursor: "pointer",
-                    transition: "background 0.1s ease",
+                    borderBottom: "1px solid rgba(186,190,204,0.35)",
+                    borderLeft: isSelected ? "4px solid var(--accent)" : "4px solid transparent",
+                    background: isSelected
+                      ? "rgba(255,71,87,0.08)"
+                      : isFocused
+                      ? "rgba(186,190,204,0.2)"
+                      : virtualRow.index % 2 === 0 ? "var(--chassis)" : "var(--panel)",
+                    transition: "background 100ms ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) (e.currentTarget as HTMLElement).style.background = "rgba(186,190,204,0.35)";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected)
+                      (e.currentTarget as HTMLElement).style.background =
+                        virtualRow.index % 2 === 0 ? "var(--chassis)" : "var(--panel)";
                   }}
                 >
-                  <div onClick={(e) => toggleSelectOne(session.id, e)}>
-                    {isChecked ? <CheckSquare size={14} color="#38bdf8" /> : <Square size={14} color="#475569" />}
+                  <div onClick={(e) => toggleSelectOne(s.id, e)}>
+                    {isChecked ? <CheckSquare size={13} color="var(--accent)" /> : <Square size={13} color="#babecc" />}
                   </div>
 
-                  <div className="font-mono" style={{ fontSize: 11, color: isSelected ? "#38bdf8" : "#94a3b8" }}>
-                    {session.id}
+                  <div className="tabular-mono" style={{ fontSize: 10.5, color: isSelected ? "var(--accent)" : "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {s.id.split("-")[0]}…
                   </div>
 
-                  <div className="font-mono" style={{ fontSize: 11.5, color: "#f8fafc" }}>
-                    {session.client_ip}:{session.client_port}
+                  <div className="tabular-mono" style={{ fontSize: 11, color: "var(--text-primary)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {s.client_ip}:{s.client_port}
                   </div>
 
-                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    <span style={{ color: "#f8fafc", fontWeight: 500 }}>
-                      {session.sni || `${session.server_ip}:${session.server_port}`}
+                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 11.5, fontWeight: 700, color: "var(--text-primary)" }}>
+                    {s.sni || `${s.server_ip}:${s.server_port}`}
+                  </div>
+
+                  <div>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "2px 6px",
+                        borderRadius: 4,
+                        fontSize: 9.5,
+                        fontWeight: 700,
+                        background: "var(--recessed)",
+                        color: "var(--text-primary)",
+                        boxShadow: "var(--shadow-recessed)",
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
+                      {s.protocol}
                     </span>
                   </div>
 
                   <div>
-                    <span className="badge" style={{ background: "#1e293b", color: "#38bdf8", padding: "1px 5px", fontSize: 10 }}>
-                      {session.protocol}
-                    </span>
-                  </div>
-
-                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {session.starttls_state === "S_STRIP_DETECTED" ? (
-                      <span className="badge badge-CRITICAL" style={{ padding: "1px 5px", fontSize: 10 }}>STRIP DETECTED</span>
-                    ) : session.starttls_state === "S4_ENCRYPTED" ? (
-                      <span style={{ color: "#10b981", fontSize: 11, fontWeight: 500 }}>Encrypted (S4)</span>
+                    {s.starttls_state === "S_STRIP_DETECTED" ? (
+                      <span className="risk-plaque risk-plaque-CRITICAL" style={{ fontSize: 9 }}>STRIPPED</span>
+                    ) : s.starttls_state === "S4_ENCRYPTED" ? (
+                      <span className="risk-plaque risk-plaque-SECURE" style={{ fontSize: 9 }}>ENCRYPTED</span>
                     ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{session.starttls_state}</span>
+                      <span className="tabular-mono" style={{ fontSize: 10, color: "var(--text-muted)" }}>{s.starttls_state.replace(/_/g, " ")}</span>
                     )}
                   </div>
 
                   <div>
-                    <span className={`badge badge-${session.risk_band}`} style={{ fontSize: 11, padding: "2px 7px" }}>
-                      {session.risk_score.toFixed(0)} &bull; {session.risk_band}
+                    <span className={`risk-plaque risk-plaque-${s.risk_band}`} style={{ fontSize: 9.5 }}>
+                      {s.risk_score.toFixed(0)} {s.risk_band}
                     </span>
                   </div>
 
                   <div>
-                    {session.temporal_classification === "BEACON_CANDIDATE" ? (
-                      <span className="badge badge-CRITICAL" style={{ fontSize: 9.5, padding: "1px 5px", background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", color: "#fca5a5" }}>
-                        BEACON
-                      </span>
-                    ) : session.temporal_classification === "SUSPICIOUS_TIMING" ? (
-                      <span className="badge badge-HIGH" style={{ fontSize: 9.5, padding: "1px 5px", background: "rgba(245, 158, 11, 0.2)", border: "1px solid #f59e0b", color: "#fcd34d" }}>
-                        SUSPICIOUS
-                      </span>
+                    {s.temporal_classification === "BEACON_CANDIDATE" ? (
+                      <span className="risk-plaque risk-plaque-CRITICAL" style={{ fontSize: 9 }}>BEACON</span>
+                    ) : s.temporal_classification === "SUSPICIOUS_TIMING" ? (
+                      <span className="risk-plaque risk-plaque-WEAK" style={{ fontSize: 9 }}>SUSP.</span>
                     ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 10.5 }}>Normal</span>
+                      <span className="tabular-mono" style={{ fontSize: 10, color: "var(--text-muted)" }}>NORMAL</span>
                     )}
                   </div>
 
-                  <div>
-                    {session.is_anomaly ? (
-                      <span className="badge badge-WEAK" style={{ fontSize: 9.5, padding: "1px 5px", background: "rgba(168, 85, 247, 0.2)", color: "#d8b4fe" }}>
-                        Exp Outlier
-                      </span>
-                    ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 10.5 }}>Inlier</span>
-                    )}
+                  <div className="tabular-mono" style={{ fontSize: 11, color: "var(--text-secondary)" }}>
+                    {(((s.c2s_bytes || 0) + (s.s2c_bytes || 0)) / 1024).toFixed(1)} KB
                   </div>
 
-                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                    {(((session.c2s_bytes || 0) + (session.s2c_bytes || 0)) / 1024).toFixed(1)} KB
-                  </div>
-
-                  <div style={{ textAlign: "right" }}>
-                    <ChevronRight size={14} color={isSelected ? "#38bdf8" : "#64748b"} />
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <ChevronRight size={14} color={isSelected ? "var(--accent)" : "#babecc"} />
                   </div>
                 </div>
               );
@@ -368,16 +319,31 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
           </div>
         </div>
 
-        {/* Footer status bar */}
-        <div style={{ padding: "6px 14px", borderTop: "1px solid var(--border-subtle)", background: "#0a0e17", display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)" }}>
+        {/* Switchboard Footer Status Plate */}
+        <div
+          style={{
+            padding: "8px 18px",
+            borderTop: "1px solid #babecc",
+            background: "var(--chassis)",
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: 11,
+            color: "var(--text-secondary)",
+            fontFamily: "var(--font-mono)",
+            flexShrink: 0,
+          }}
+        >
           <div>
-            Showing <b>{filteredSessions.length.toLocaleString()}</b> of {sessions.length.toLocaleString()} flows &bull; Keyboard: <kbd className="font-mono">j/k</kbd> navigate &bull; <kbd className="font-mono">Enter</kbd> inspect &bull; <kbd className="font-mono">v</kbd> verdict
+            ACTIVE CHANNELS: <strong style={{ color: "var(--text-primary)" }}>{filteredSessions.length.toLocaleString()}</strong> OF {sessions.length.toLocaleString()}
+            &nbsp;·&nbsp;<kbd style={{ background: "var(--recessed)", borderRadius: 4, padding: "2px 6px", boxShadow: "var(--shadow-recessed)" }}>j/k</kbd> SHIFT
+            &nbsp;·&nbsp;<kbd style={{ background: "var(--recessed)", borderRadius: 4, padding: "2px 6px", boxShadow: "var(--shadow-recessed)" }}>Enter</kbd> DISSECT
           </div>
-          <div>
-            Sub-200ms virtualized rendering (TanStack Virtual)
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <SlidersHorizontal size={12} color="var(--accent)" />
+            <span>VIRTUAL BUS LATENCY &lt; 200MS</span>
           </div>
         </div>
-      </div>
+      </IndustrialCard>
     </div>
   );
 };

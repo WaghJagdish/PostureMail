@@ -9,8 +9,11 @@ import {
   ResponsiveContainer,
   ZAxis,
 } from "recharts";
-import { Network, Activity, Radio, Info } from "lucide-react";
+import { Network, ArrowRight } from "lucide-react";
 import { AnalysisDetailResponse, SessionDetailSchema } from "../../api/client";
+import { IndustrialCard } from "../common/IndustrialCard";
+import { TactileButton } from "../common/TactileButton";
+import { LedIndicator } from "../common/LedIndicator";
 
 interface CorpusCorrelationsViewProps {
   analysis: AnalysisDetailResponse;
@@ -40,7 +43,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
 }) => {
   const [selectedGroup, setSelectedGroup] = useState<TemporalGroupDisplay | null>(null);
 
-  // Derive temporal groups from backend analysis.summary_data.temporal_groups or directly compute from sessions
+  // Derive temporal groups
   const temporalGroups: TemporalGroupDisplay[] = useMemo(() => {
     const rawGroups = (analysis.summary_data as any)?.temporal_groups;
     if (Array.isArray(rawGroups) && rawGroups.length > 0) {
@@ -62,7 +65,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
       }));
     }
 
-    // Client-side grouping fallback (deterministic implementation matching Python engine)
+    // Client-side grouping fallback
     const pairs: Record<string, { sessions: SessionDetailSchema[]; times: number[] }> = {};
     analysis.sessions.forEach((s: SessionDetailSchema) => {
       const key = `${s.client_ip} → ${s.server_ip}:${s.server_port}`;
@@ -92,7 +95,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
           duration: count > 1 ? +(sortedTimes[count - 1] - sortedTimes[0]).toFixed(1) : 0,
           behavior_score: 0,
           classification: "INSUFFICIENT_DATA",
-          explanation: [`Only ${count} communication events observed (minimum threshold is 5).`],
+          explanation: [`Only ${count} communication events observed (threshold >= 5).`],
           analyst_note: "Insufficient observations to perform reliable temporal timing analysis.",
         });
         return;
@@ -113,7 +116,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
       const jitter = cv * 100;
       const duration = sortedTimes[count - 1] - sortedTimes[0];
 
-      let score = 20; // 5+ events
+      let score = 20;
       const reasons: string[] = [`${count} communication events observed (>= 5)`];
 
       if (avg > 0) {
@@ -167,7 +170,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
     return calculated.sort((a, b) => b.behavior_score - a.behavior_score);
   }, [analysis]);
 
-  // Aggregate summary counts (§20)
+  // Aggregate summary counts
   const summaryCounts = useMemo(() => {
     const rawSummary = (analysis.summary_data as any)?.temporal_summary;
     if (rawSummary && rawSummary.analyzed_groups !== undefined) {
@@ -215,107 +218,146 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
   const activeGroup = selectedGroup || temporalGroups.find((g) => g.classification === "BEACON_CANDIDATE") || temporalGroups[0] || null;
 
   return (
-    <div style={{ padding: "8px 16px", maxWidth: 1400, margin: "0 auto" }}>
-      {/* Top Banner & Context Note */}
-      <div className="card" style={{ padding: 18, marginBottom: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+    <div style={{ maxWidth: 1400, margin: "0 auto", paddingBottom: 32 }}>
+
+      {/* ── Top Context Station ── */}
+      <IndustrialCard elevation="base" bolted={true} vents={true} tag="TEMPORAL SIGNAL CORRELATOR & RADAR" style={{ marginBottom: 20 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 14 }}>
           <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 8 }}>
-              <Network size={20} color="#38bdf8" />
-              Behavioral Analysis: Automated Timing & Regular Polling Detection
+            <h2 style={{ fontSize: 16, fontWeight: 800, color: "var(--text-primary)", display: "flex", alignItems: "center", gap: 10 }} className="text-embossed-light">
+              <Network size={20} color="var(--accent)" />
+              AUTOMATED BEACONING & PERIODIC TIMING DISCRIMINATION
             </h2>
-            <p style={{ fontSize: 12.5, color: "var(--text-secondary)", marginTop: 4, maxWidth: 900 }}>
-              Evaluates inter-arrival timing regularity (mean interval, standard deviation, CoV, jitter percentage) across repeated sessions between endpoint pairs. Identifies automated beacon candidates without claiming malicious intent.
+            <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 4, maxWidth: 900 }}>
+              Evaluates inter-arrival timing regularity (mean recurrence period, CoV, jitter percentage) across repeated sessions between endpoint pairs. Identifies automated beacon candidates without claiming malicious intent.
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", background: "rgba(56, 189, 248, 0.08)", border: "1px solid rgba(56, 189, 248, 0.2)", borderRadius: 6, padding: "8px 12px" }}>
-            <Info size={15} color="#38bdf8" />
-            <span style={{ fontSize: 11.5, color: "#94a3b8" }}>
-              <strong>Evidence Fusion:</strong> Operates alongside deterministic NIST SP 800-57 risk scoring.
-            </span>
-          </div>
+
+          <LedIndicator status="green" label="FFT ENGINE READY" size="sm" />
         </div>
 
-        {/* Behavioral Analysis KPI Summary Cards (§20) */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, marginTop: 16 }}>
-          <div style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.25)", borderRadius: 6, padding: "10px 14px" }}>
-            <div style={{ fontSize: 11, color: "#fca5a5", fontWeight: 600 }}>Automated Timing Candidates</div>
-            <div className="font-mono" style={{ fontSize: 22, fontWeight: 800, color: "#ef4444", marginTop: 2 }}>
+        {/* Behavioral KPI Summary Meters */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginTop: 20 }}>
+          <div
+            style={{
+              background: "var(--recessed)",
+              boxShadow: "var(--shadow-recessed)",
+              borderRadius: 10,
+              padding: "12px 16px",
+              borderLeft: "4px solid #ef4444",
+            }}
+          >
+            <div className="stamped-label" style={{ fontSize: 9.5, color: "#ef4444" }}>AUTOMATED CANDIDATES</div>
+            <div className="tabular-mono" style={{ fontSize: 24, fontWeight: 900, color: "var(--text-primary)", marginTop: 2 }}>
               {summaryCounts.beaconCandidates}
             </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>Score &ge; 70 (Requires Investigation)</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>
+              SCORE &ge; 70 (HIGH REGULARITY)
+            </div>
           </div>
 
-          <div style={{ background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.25)", borderRadius: 6, padding: "10px 14px" }}>
-            <div style={{ fontSize: 11, color: "#fcd34d", fontWeight: 600 }}>Suspicious Timing Patterns</div>
-            <div className="font-mono" style={{ fontSize: 22, fontWeight: 800, color: "#f59e0b", marginTop: 2 }}>
+          <div
+            style={{
+              background: "var(--recessed)",
+              boxShadow: "var(--shadow-recessed)",
+              borderRadius: 10,
+              padding: "12px 16px",
+              borderLeft: "4px solid #f59e0b",
+            }}
+          >
+            <div className="stamped-label" style={{ fontSize: 9.5, color: "#f59e0b" }}>SUSPICIOUS TIMING</div>
+            <div className="tabular-mono" style={{ fontSize: 24, fontWeight: 900, color: "var(--text-primary)", marginTop: 2 }}>
               {summaryCounts.suspiciousTiming}
             </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>Score 40-69 (Moderate Regularity)</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>
+              SCORE 40-69 (MODERATE JITTER)
+            </div>
           </div>
 
-          <div style={{ background: "rgba(100, 116, 139, 0.1)", border: "1px solid rgba(100, 116, 139, 0.25)", borderRadius: 6, padding: "10px 14px" }}>
-            <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 600 }}>Insufficient Data</div>
-            <div className="font-mono" style={{ fontSize: 22, fontWeight: 800, color: "#cbd5e1", marginTop: 2 }}>
+          <div
+            style={{
+              background: "var(--recessed)",
+              boxShadow: "var(--shadow-recessed)",
+              borderRadius: 10,
+              padding: "12px 16px",
+              borderLeft: "4px solid #babecc",
+            }}
+          >
+            <div className="stamped-label" style={{ fontSize: 9.5 }}>INSUFFICIENT DATA</div>
+            <div className="tabular-mono" style={{ fontSize: 24, fontWeight: 900, color: "var(--text-primary)", marginTop: 2 }}>
               {summaryCounts.insufficientData}
             </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>&lt; 5 Events (No Score Fabricated)</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>
+              &lt; 5 SESSIONS OBSERVED
+            </div>
           </div>
 
-          <div style={{ background: "rgba(56, 189, 248, 0.08)", border: "1px solid rgba(56, 189, 248, 0.2)", borderRadius: 6, padding: "10px 14px" }}>
-            <div style={{ fontSize: 11, color: "#7dd3fc", fontWeight: 600 }}>Analyzed Endpoint Pairs</div>
-            <div className="font-mono" style={{ fontSize: 22, fontWeight: 800, color: "#38bdf8", marginTop: 2 }}>
+          <div
+            style={{
+              background: "var(--recessed)",
+              boxShadow: "var(--shadow-recessed)",
+              borderRadius: 10,
+              padding: "12px 16px",
+              borderLeft: "4px solid var(--accent)",
+            }}
+          >
+            <div className="stamped-label" style={{ fontSize: 9.5, color: "var(--accent)" }}>MONITORED ENDPOINTS</div>
+            <div className="tabular-mono" style={{ fontSize: 24, fontWeight: 900, color: "var(--accent)", marginTop: 2 }}>
               {summaryCounts.analyzedGroups}
             </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>Canonical 4-Tuple Flows</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>
+              CANONICAL 4-TUPLE PAIRS
+            </div>
           </div>
         </div>
-      </div>
+      </IndustrialCard>
 
-      {/* Main Grid: Visual Scatter Plot & Inspector */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1.6fr", gap: 16, marginBottom: 16 }}>
-        {/* Scatter Plot */}
-        <div className="card" style={{ padding: 18 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
-              <Radio size={16} color="#38bdf8" />
-              Timing Interval vs. Jitter (%) Distribution
-            </h3>
-            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Low Jitter (&lt;15%) &bull; High Regularity</span>
-          </div>
+      {/* ── Main Grid: Visual Scatter Oscilloscope & Inspector ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1.6fr", gap: 20, marginBottom: 20 }}>
 
+        {/* Scatter Plot Oscilloscope */}
+        <IndustrialCard elevation="base" bolted={true} tag="RECURRENCE INTERVAL VS. JITTER (%) PLOT">
           <div style={{ height: 280, width: "100%" }}>
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#babecc" />
                 <XAxis
                   type="number"
                   dataKey="x"
                   name="Interval (s)"
                   unit="s"
-                  stroke="#64748b"
-                  fontSize={11}
-                  label={{ value: "Mean Recurrence Period (seconds)", position: "insideBottom", offset: -5, fill: "#94a3b8", fontSize: 11 }}
+                  stroke="#4a5568"
+                  fontSize={10}
+                  label={{ value: "Mean Recurrence Period (seconds)", position: "insideBottom", offset: -5, fill: "#4a5568", fontSize: 10 }}
                 />
                 <YAxis
                   type="number"
                   dataKey="y"
                   name="Jitter (%)"
                   unit="%"
-                  stroke="#64748b"
-                  fontSize={11}
-                  label={{ value: "Jitter (%)", angle: -90, position: "insideLeft", fill: "#94a3b8", fontSize: 11 }}
+                  stroke="#4a5568"
+                  fontSize={10}
+                  label={{ value: "Jitter (%)", angle: -90, position: "insideLeft", fill: "#4a5568", fontSize: 10 }}
                 />
                 <ZAxis type="number" dataKey="z" range={[60, 400]} name="Event Count" />
                 <Tooltip
                   cursor={{ strokeDasharray: "3 3" }}
-                  contentStyle={{ background: "#0f172a", borderColor: "#334155", borderRadius: 6, fontSize: 12 }}
-                  formatter={(val: any, name: any) => [val, String(name)]}
+                  content={({ active, payload }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div style={{ background: "#1e242b", border: "1px solid #14181d", borderRadius: 8, padding: "8px 12px", color: "#fff", fontFamily: "var(--font-mono)", fontSize: 11 }}>
+                        <div style={{ fontWeight: 800, color: "var(--accent)" }}>{d.name}</div>
+                        <div>Interval: {d.x}s · Jitter: {d.y}%</div>
+                        <div>Events: {d.z} · Score: {d.score}</div>
+                      </div>
+                    );
+                  }}
                 />
                 <Scatter
                   name="Endpoints"
                   data={scatterData}
-                  fill="#38bdf8"
+                  fill="var(--accent)"
                   onClick={(entry: any) => {
                     if (entry && entry.rawGroup) setSelectedGroup(entry.rawGroup);
                   }}
@@ -323,42 +365,37 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
               </ScatterChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </IndustrialCard>
 
-        {/* Explainability Inspector Box (§21) */}
-        <div className="card" style={{ padding: 18 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-            <Activity size={16} color="#38bdf8" />
-            Behavioral Evidence Explanation
-          </h3>
-
+        {/* Explainability Inspector Box */}
+        <IndustrialCard elevation="base" bolted={true} tag="BEHAVIORAL EVIDENCE EXPLAINER">
           {activeGroup ? (
-            <div style={{ background: "rgba(15, 23, 42, 0.6)", border: "1px solid var(--border-subtle)", borderRadius: 6, padding: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, paddingBottom: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+            <div
+              style={{
+                background: "var(--recessed)",
+                boxShadow: "var(--shadow-recessed)",
+                borderRadius: 10,
+                padding: 16,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 10, borderBottom: "1px solid rgba(186,190,204,0.4)" }}>
                 <div>
-                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Target Endpoint Pair:</span>
-                  <div className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#38bdf8" }}>{activeGroup.pair}</div>
+                  <span className="stamped-label" style={{ fontSize: 9.5 }}>TARGET ENDPOINT PAIR:</span>
+                  <div className="tabular-mono" style={{ fontSize: 13, fontWeight: 800, color: "var(--accent)", marginTop: 2 }}>
+                    {activeGroup.pair}
+                  </div>
                 </div>
                 <div>
-                  <span
-                    className={`badge badge-${
-                      activeGroup.classification === "BEACON_CANDIDATE"
-                        ? "CRITICAL"
-                        : activeGroup.classification === "SUSPICIOUS_TIMING"
-                        ? "HIGH"
-                        : "LOW"
-                    }`}
-                    style={{ fontSize: 11, padding: "4px 8px" }}
-                  >
+                  <span className={`risk-plaque risk-plaque-${activeGroup.classification === "BEACON_CANDIDATE" ? "CRITICAL" : activeGroup.classification === "SUSPICIOUS_TIMING" ? "WEAK" : "SECURE"}`}>
                     {activeGroup.classification.replace(/_/g, " ")}
                   </span>
                 </div>
               </div>
 
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#fff", marginBottom: 6 }}>
-                Why was this flagged?
+              <div className="stamped-label" style={{ fontSize: 10, marginBottom: 6, color: "var(--text-primary)" }}>
+                DIAGNOSTIC EVIDENCE METRICS:
               </div>
-              <ul style={{ margin: "0 0 12px 18px", padding: 0, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
+              <ul style={{ margin: "0 0 14px 18px", padding: 0, fontSize: 11.5, fontFamily: "var(--font-mono)", color: "var(--text-secondary)", lineHeight: 1.7 }}>
                 {activeGroup.explanation.length > 0 ? (
                   activeGroup.explanation.map((reason, idx) => (
                     <li key={idx}><strong>•</strong> {reason}</li>
@@ -369,130 +406,114 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
                     {activeGroup.mean_interval !== null && <li>• Mean interval: {activeGroup.mean_interval} seconds</li>}
                     {activeGroup.jitter_pct !== null && <li>• Jitter: {activeGroup.jitter_pct}%</li>}
                     {activeGroup.cv !== null && <li>• Coefficient of variation: {activeGroup.cv}</li>}
-                    {activeGroup.duration > 0 && <li>• Communication persisted for {(activeGroup.duration / 60).toFixed(1)} minutes</li>}
                   </>
                 )}
               </ul>
 
-              <div style={{ background: "rgba(30, 41, 59, 0.5)", borderLeft: "3px solid #38bdf8", padding: "8px 12px", borderRadius: "0 4px 4px 0", marginBottom: 12 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#38bdf8", textTransform: "uppercase" }}>Forensic Interpretation</div>
-                <div style={{ fontSize: 11.5, color: "#e2e8f0", marginTop: 2 }}>
-                  {activeGroup.analyst_note || "Regular automated communication pattern requiring investigation. Timing alone does not establish malicious activity."}
+              <div style={{ background: "var(--chassis)", borderLeft: "3px solid var(--accent)", padding: "8px 12px", borderRadius: "0 6px 6px 0", marginBottom: 14 }}>
+                <div className="stamped-label" style={{ fontSize: 9.5, color: "var(--accent)" }}>ANALYST INTERPRETATION</div>
+                <div style={{ fontSize: 11.5, color: "var(--text-primary)", marginTop: 2, fontFamily: "var(--font-mono)" }}>
+                  {activeGroup.analyst_note || "Regular automated communication pattern requiring investigation."}
                 </div>
               </div>
 
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <button
-                  className="btn btn-primary btn-sm"
+                <TactileButton
+                  variant="primary"
+                  size="sm"
                   onClick={() => onFilterSessions({ search: activeGroup.src_ip })}
-                  style={{ fontSize: 11 }}
+                  iconRight={<ArrowRight size={12} />}
                 >
-                  Filter Associated Sessions ({activeGroup.event_count}) &rarr;
-                </button>
+                  FILTER IN SWITCHBOARD ({activeGroup.event_count})
+                </TactileButton>
               </div>
             </div>
           ) : (
             <div style={{ color: "var(--text-muted)", fontSize: 12, padding: 30, textAlign: "center" }}>
-              Select an endpoint pair from the table below to inspect underlying evidence.
+              SELECT AN ENDPOINT PAIR TO INSPECT SKEUOMORPHIC SIGNAL PROVENANCE
             </div>
           )}
-        </div>
+        </IndustrialCard>
       </div>
 
-      {/* Recommended Table (§20) */}
-      <div className="card" style={{ padding: 18, overflowX: "auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
-            <Activity size={16} color="#38bdf8" />
-            Analyzed Communication Groups & Behavioral Regularity ({temporalGroups.length})
-          </h3>
-          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-            Sorted by Regularity Score &bull; Click row to inspect explanation
-          </span>
-        </div>
-
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border-subtle)", textAlign: "left", color: "var(--text-muted)", fontSize: 11 }}>
-              <th style={{ padding: "8px 10px" }}>Endpoint Pair</th>
-              <th style={{ padding: "8px 10px" }}>Connections</th>
-              <th style={{ padding: "8px 10px" }}>Mean Interval</th>
-              <th style={{ padding: "8px 10px" }}>Jitter (%)</th>
-              <th style={{ padding: "8px 10px" }}>CV</th>
-              <th style={{ padding: "8px 10px" }}>Score</th>
-              <th style={{ padding: "8px 10px" }}>Classification</th>
-              <th style={{ padding: "8px 10px", textAlign: "right" }}>Inspect</th>
-            </tr>
-          </thead>
-          <tbody>
-            {temporalGroups.map((b, idx) => {
-              const isSelected = activeGroup?.pair === b.pair;
-              return (
-                <tr
-                  key={idx}
-                  onClick={() => setSelectedGroup(b)}
-                  style={{
-                    borderBottom: "1px solid rgba(255, 255, 255, 0.04)",
-                    cursor: "pointer",
-                    background: isSelected ? "rgba(56, 189, 248, 0.08)" : undefined,
-                  }}
-                >
-                  <td className="font-mono" style={{ padding: "9px 10px", color: "#f8fafc", fontSize: 11 }}>
-                    {b.pair}
-                  </td>
-                  <td className="font-mono" style={{ padding: "9px 10px", color: "#cbd5e1" }}>
-                    {b.event_count}
-                  </td>
-                  <td className="font-mono" style={{ padding: "9px 10px", color: b.mean_interval !== null ? "#38bdf8" : "var(--text-muted)" }}>
-                    {b.mean_interval !== null ? `${b.mean_interval}s` : "N/A"}
-                  </td>
-                  <td
-                    className="font-mono"
+      {/* ── Communication Groups Table ── */}
+      <IndustrialCard elevation="base" bolted={true} vents={true} tag={`ANALYZED FLOW RACK (${temporalGroups.length})`}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11.5 }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid #babecc", textAlign: "left" }}>
+                <th className="stamped-label" style={{ padding: "8px 10px" }}>ENDPOINT PAIR</th>
+                <th className="stamped-label" style={{ padding: "8px 10px" }}>EVENTS</th>
+                <th className="stamped-label" style={{ padding: "8px 10px" }}>PERIOD</th>
+                <th className="stamped-label" style={{ padding: "8px 10px" }}>JITTER</th>
+                <th className="stamped-label" style={{ padding: "8px 10px" }}>COV</th>
+                <th className="stamped-label" style={{ padding: "8px 10px" }}>SCORE</th>
+                <th className="stamped-label" style={{ padding: "8px 10px" }}>CLASSIFICATION</th>
+                <th className="stamped-label" style={{ padding: "8px 10px", textAlign: "right" }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {temporalGroups.map((b, idx) => {
+                const isSelected = activeGroup?.pair === b.pair;
+                return (
+                  <tr
+                    key={idx}
+                    onClick={() => setSelectedGroup(b)}
                     style={{
-                      padding: "9px 10px",
-                      color: b.jitter_pct !== null ? (b.jitter_pct < 15 ? "#f87171" : "var(--text-secondary)") : "var(--text-muted)",
+                      borderBottom: "1px solid rgba(186,190,204,0.35)",
+                      cursor: "pointer",
+                      background: isSelected ? "rgba(255, 71, 87, 0.08)" : undefined,
+                      borderLeft: isSelected ? "3px solid var(--accent)" : "3px solid transparent",
                     }}
                   >
-                    {b.jitter_pct !== null ? `${b.jitter_pct}%` : "N/A"}
-                  </td>
-                  <td className="font-mono" style={{ padding: "9px 10px", color: b.cv !== null ? "#10b981" : "var(--text-muted)" }}>
-                    {b.cv !== null ? b.cv : "N/A"}
-                  </td>
-                  <td className="font-mono" style={{ padding: "9px 10px", fontWeight: 700, color: b.behavior_score >= 70 ? "#ef4444" : b.behavior_score >= 40 ? "#f59e0b" : "var(--text-muted)" }}>
-                    {b.behavior_score}
-                  </td>
-                  <td style={{ padding: "9px 10px" }}>
-                    <span
-                      className={`badge badge-${
-                        b.classification === "BEACON_CANDIDATE"
-                          ? "CRITICAL"
-                          : b.classification === "SUSPICIOUS_TIMING"
-                          ? "HIGH"
-                          : "LOW"
-                      }`}
-                      style={{ fontSize: 10 }}
-                    >
-                      {b.classification.replace(/_/g, " ")}
-                    </span>
-                  </td>
-                  <td style={{ padding: "9px 10px", textAlign: "right" }}>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedGroup(b);
+                    <td className="tabular-mono" style={{ padding: "9px 10px", fontWeight: 700, color: "var(--text-primary)" }}>
+                      {b.pair}
+                    </td>
+                    <td className="tabular-mono" style={{ padding: "9px 10px" }}>
+                      {b.event_count}
+                    </td>
+                    <td className="tabular-mono" style={{ padding: "9px 10px", color: b.mean_interval !== null ? "var(--accent)" : "var(--text-muted)" }}>
+                      {b.mean_interval !== null ? `${b.mean_interval}s` : "N/A"}
+                    </td>
+                    <td
+                      className="tabular-mono"
+                      style={{
+                        padding: "9px 10px",
+                        color: b.jitter_pct !== null ? (b.jitter_pct < 15 ? "#ef4444" : "var(--text-secondary)") : "var(--text-muted)",
                       }}
-                      style={{ padding: "3px 8px", fontSize: 10.5 }}
                     >
-                      View &rarr;
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                      {b.jitter_pct !== null ? `${b.jitter_pct}%` : "N/A"}
+                    </td>
+                    <td className="tabular-mono" style={{ padding: "9px 10px", color: b.cv !== null ? "#10b981" : "var(--text-muted)" }}>
+                      {b.cv !== null ? b.cv : "N/A"}
+                    </td>
+                    <td className="tabular-mono" style={{ padding: "9px 10px", fontWeight: 800, color: b.behavior_score >= 70 ? "#ef4444" : b.behavior_score >= 40 ? "#f59e0b" : "var(--text-muted)" }}>
+                      {b.behavior_score}
+                    </td>
+                    <td style={{ padding: "9px 10px" }}>
+                      <span className={`risk-plaque risk-plaque-${b.classification === "BEACON_CANDIDATE" ? "CRITICAL" : b.classification === "SUSPICIOUS_TIMING" ? "WEAK" : "SECURE"}`} style={{ fontSize: 9.5 }}>
+                        {b.classification.replace(/_/g, " ")}
+                      </span>
+                    </td>
+                    <td style={{ padding: "9px 10px", textAlign: "right" }}>
+                      <TactileButton
+                        variant="chassis"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedGroup(b);
+                        }}
+                      >
+                        DISSECT →
+                      </TactileButton>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </IndustrialCard>
     </div>
   );
 };

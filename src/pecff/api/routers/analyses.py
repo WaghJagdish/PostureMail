@@ -13,7 +13,7 @@ import datetime
 import json
 from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from fastapi.responses import StreamingResponse
 
 from pecff.api.schemas import (
@@ -130,6 +130,53 @@ async def get_analysis_document(
         yield b"]}"
 
     return StreamingResponse(document_streamer(), media_type="application/json")
+
+
+@router.get(
+    "/{analysis_id}/report",
+    summary="Generate and export comprehensive executive and technical forensic reports",
+)
+async def get_analysis_report(
+    analysis_id: str,
+    format: str = Query(default="pdf", pattern="^(pdf|html|csv|json)$", description="Report format"),
+    current_user: AuthenticatedUser = Depends(require_role(["analyst", "admin", "readonly"])),
+) -> Response:
+    """Generate and return forensic report in requested format (PDF, HTML, CSV, JSON)."""
+    analysis = get_analysis_or_404(analysis_id)
+    from pecff.report.generator import ForensicReportGenerator
+
+    generator = ForensicReportGenerator()
+    timestamp_slug = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M")
+
+    record_audit_log(
+        principal=current_user.user_id,
+        role=current_user.roles[0],
+        action="export_report",
+        resource_id=analysis_id,
+        status_code=200,
+        details={"format": format},
+    )
+
+    if format == "pdf":
+        pdf_bytes = generator.generate_pdf(analysis)
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="summary-report-{analysis_id}-{timestamp_slug}.pdf"'},
+        )
+    elif format == "html":
+        html_str = generator.generate_html(analysis)
+        return Response(content=html_str, media_type="text/html")
+    elif format == "csv":
+        csv_str = generator.generate_csv(analysis)
+        return Response(
+            content=csv_str,
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="summary-report-{analysis_id}-{timestamp_slug}.csv"'},
+        )
+    else:  # json
+        json_str = generator.generate_json(analysis)
+        return Response(content=json_str, media_type="application/json")
 
 
 @router.get(

@@ -1,58 +1,85 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+/* ─── Industrial Skeuomorphism Design System (PECFF / Relic) ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-main: #0a0e17;
-  --bg-surface: #111827;
-  --bg-surface-hover: #172033;
-  --bg-card: rgba(17, 24, 39, 0.85);
-  --bg-card-glass: rgba(17, 24, 39, 0.65);
-  --bg-input: #0d131f;
+  /* Level 0 — Base Chassis (Matte ABS Plastic) */
+  --chassis:           #e0e5ec;
+  --bg-main:           #e0e5ec;
   
-  --border-subtle: #1f293d;
-  --border-focus: #38bdf8;
-  --border-glass: rgba(255, 255, 255, 0.08);
+  /* Level +1 — Raised Panel Surface */
+  --panel:             #f0f2f5;
+  --bg-surface:        #e0e5ec;
+  --bg-card:           #e0e5ec;
+  
+  /* Level -1 — Recessed Well / Sunken Trays */
+  --recessed:          #d1d9e6;
+  --bg-input:          #d1d9e6;
+  --bg-recessed:       #d1d9e6;
+  
+  /* Dark Technical Panels / CRT Displays */
+  --dark-panel:        #1e242b;
+  --dark-panel-border: #14181d;
+  --crt-screen-bg:     #121820;
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-inverse: #0f172a;
+  /* Ink & Typography */
+  --text-primary:      #2d3436;
+  --text-secondary:    #4a5568;
+  --text-muted:        #636e72;
+  --text-light:        #ffffff;
+  
+  /* Accent: Braun Safety Orange / Alert Trigger */
+  --accent:            #ff4757;
+  --accent-hover:      #ff5b6a;
+  --accent-pressed:    #e03d4c;
+  --accent-fg:         #ffffff;
 
-  /* Cryptographic Risk Band Tokens */
-  --risk-secure: #06b6d4;
-  --risk-secure-bg: rgba(6, 182, 212, 0.12);
-  --risk-secure-border: rgba(6, 182, 212, 0.3);
+  /* Neumorphic Lighting Dual Shadows (Top-Left 45° Illuminant) */
+  --shadow-light:      #ffffff;
+  --shadow-dark:       #babecc;
+  --shadow-deep:       #a3b1c6;
+  
+  --shadow-card:       8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+  --shadow-floating:   12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light), inset 1px 1px 0 rgba(255,255,255,0.7);
+  --shadow-pressed:    inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+  --shadow-recessed:   inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+  --shadow-sharp:      4px 4px 8px rgba(0,0,0,0.14), -1px -1px 1px rgba(255,255,255,0.8);
+  
+  /* Colored Button & Status Glows */
+  --shadow-accent-btn: 5px 5px 12px rgba(255, 71, 87, 0.40), -4px -4px 8px #ffffff;
+  --shadow-accent-pressed: inset 4px 4px 8px rgba(160, 30, 40, 0.55), inset -3px -3px 6px rgba(255, 120, 130, 0.45);
+  
+  --glow-orange:       0 0 12px 2px rgba(255, 71, 87, 0.65);
+  --glow-green:        0 0 10px 2px rgba(34, 197, 94, 0.70);
+  --glow-amber:        0 0 10px 2px rgba(245, 158, 11, 0.70);
+  --glow-red:          0 0 12px 2px rgba(239, 68, 68, 0.80);
 
-  --risk-acceptable: #10b981;
-  --risk-acceptable-bg: rgba(16, 185, 129, 0.12);
-  --risk-acceptable-border: rgba(16, 185, 129, 0.3);
+  /* Forensic Risk Bands (Calibrated to Industrial Hardware Status) */
+  --risk-secure:            #10b981;
+  --risk-secure-bg:         rgba(16, 185, 129, 0.12);
+  --risk-secure-border:     #10b981;
+  --risk-acceptable:        #06b6d4;
+  --risk-acceptable-bg:     rgba(6, 182, 212, 0.12);
+  --risk-acceptable-border: #06b6d4;
+  --risk-weak:              #f59e0b;
+  --risk-weak-bg:           rgba(245, 158, 11, 0.14);
+  --risk-weak-border:       #f59e0b;
+  --risk-high:              #f97316;
+  --risk-high-bg:           rgba(249, 115, 22, 0.14);
+  --risk-high-border:       #f97316;
+  --risk-critical:          #ef4444;
+  --risk-critical-bg:       rgba(239, 68, 68, 0.15);
+  --risk-critical-border:   #ef4444;
 
-  --risk-weak: #eab308;
-  --risk-weak-bg: rgba(234, 179, 8, 0.12);
-  --risk-weak-border: rgba(234, 179, 8, 0.3);
-
-  --risk-high: #f97316;
-  --risk-high-bg: rgba(249, 115, 22, 0.12);
-  --risk-high-border: rgba(249, 115, 22, 0.3);
-
-  --risk-critical: #ef4444;
-  --risk-critical-bg: rgba(239, 68, 68, 0.15);
-  --risk-critical-border: rgba(239, 68, 68, 0.4);
-
-  --accent-cyan: #38bdf8;
-  --accent-blue: #3b82f6;
-  --accent-purple: #a855f7;
-  --accent-amber: #f59e0b;
-
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
-  --shadow-glow-cyan: 0 0 20px -3px rgba(56, 189, 248, 0.25);
-  --shadow-glow-red: 0 0 20px -3px rgba(239, 68, 68, 0.25);
-
+  /* Typography Stacks */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, Monaco, monospace;
+
+  /* Mechanical Animation Curves */
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-mechanical: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ─── Global Reset & Ambient Lighting ─── */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -60,192 +87,402 @@
 }
 
 html, body {
-  background-color: var(--bg-main);
+  background-color: var(--chassis);
+  /* Top-left diffuse workshop lighting hotspot */
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(255,255,255,0.6) 0%, transparent 60%),
+    radial-gradient(circle at 90% 90%, rgba(186,190,204,0.3) 0%, transparent 50%);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-main);
-}
-::-webkit-scrollbar-thumb {
-  background: #27354f;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #3b4d6e;
+/* ─── Typography & Stamped Mechanical Labels ─── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.9);
 }
 
-/* Base Utility Classes */
-.glass-panel {
-  background: var(--bg-card-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-glass);
-  border-radius: 10px;
+.text-embossed-light {
+  text-shadow: 0 1px 0 rgba(255,255,255,0.9);
 }
 
-.card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+.text-embossed-dark {
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-.card:hover {
-  border-color: #2e3e5c;
+/* Stamped Industrial Technical Tag */
+.stamped-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
 }
 
-.badge {
-  display: inline-flex;
+.tabular-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "zero" 1, "tnum" 1;
+}
+
+/* ─── Industrial Neumorphic Surfaces ─── */
+.chassis-panel {
+  background: var(--chassis);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(255,255,255,0.4);
+  transition: all 250ms var(--ease-mechanical);
+  position: relative;
+}
+
+.chassis-panel-floating {
+  background: var(--chassis);
+  border-radius: 16px;
+  box-shadow: var(--shadow-floating);
+  border: 1px solid rgba(255,255,255,0.6);
+  transition: all 250ms var(--ease-mechanical);
+}
+
+.chassis-recessed {
+  background: var(--recessed);
+  border-radius: 12px;
+  box-shadow: var(--shadow-recessed);
+  border: none;
+}
+
+/* ─── Bolted Corner Rivets / Screws ─── */
+.bolted-panel {
+  position: relative;
+}
+.bolted-panel::before,
+.bolted-panel::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #a3b1c6 65%, #636e72 100%);
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.25), inset 0 0 1px rgba(0,0,0,0.5);
+  pointer-events: none;
+  z-index: 2;
+}
+.bolted-panel::before {
+  top: 10px;
+  left: 10px;
+}
+.bolted-panel::after {
+  top: 10px;
+  right: 10px;
+}
+
+.bolted-panel-all::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #a3b1c6 65%, #636e72 100%);
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+}
+
+/* ─── Mechanical Ventilation Grille Slots ─── */
+.vent-slot {
+  width: 3px;
+  height: 22px;
+  border-radius: 9999px;
+  background: var(--recessed);
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.25), 1px 1px 1px rgba(255,255,255,0.6);
+}
+
+.vent-grille {
+  display: flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 8px;
-  border-radius: 9999px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 
-.badge-SECURE {
-  background: var(--risk-secure-bg);
-  color: var(--risk-secure);
-  border: 1px solid var(--risk-secure-border);
-}
-.badge-ACCEPTABLE {
-  background: var(--risk-acceptable-bg);
-  color: var(--risk-acceptable);
-  border: 1px solid var(--risk-acceptable-border);
-}
-.badge-WEAK {
-  background: var(--risk-weak-bg);
-  color: var(--risk-weak);
-  border: 1px solid var(--risk-weak-border);
-}
-.badge-HIGH {
-  background: var(--risk-high-bg);
-  color: var(--risk-high);
-  border: 1px solid var(--risk-high-border);
-}
-.badge-CRITICAL {
-  background: var(--risk-critical-bg);
-  color: var(--risk-critical);
-  border: 1px solid var(--risk-critical-border);
-}
-
-.btn {
+/* ─── Tactile Physical Key Buttons ─── */
+.tactile-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 7px 14px;
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 6px;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.15s ease;
-  user-select: none;
-}
-
-.btn-primary {
-  background: #0284c7;
-  color: #fff;
-  border-color: #0369a1;
-}
-.btn-primary:hover {
-  background: #0ea5e9;
-  box-shadow: 0 0 12px rgba(14, 165, 233, 0.4);
-}
-
-.btn-secondary {
-  background: #1e293b;
-  color: var(--text-primary);
-  border-color: var(--border-subtle);
-}
-.btn-secondary:hover {
-  background: #334155;
-  border-color: #475569;
-}
-
-.btn-danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.4);
-}
-.btn-danger:hover {
-  background: #ef4444;
-  color: #fff;
-}
-
-.btn-sm {
-  padding: 4px 9px;
-  font-size: 11.5px;
-}
-
-input[type="text"], input[type="search"], select, textarea {
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  border-radius: 6px;
-  padding: 6px 10px;
-  outline: none;
-  transition: border-color 0.15s ease;
-}
-
-input[type="text"]:focus, input[type="search"]:focus, select:focus, textarea:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
-}
-
-.font-mono {
-  font-family: var(--font-mono);
-}
-
-/* Animations */
-@keyframes pulse-dot {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
-}
-
-.pulse-active {
-  animation: pulse-dot 2s infinite ease-in-out;
-}
-
-/* Hex dump formatting */
-.hex-dump-container {
-  background: #080c14;
-  border: 1px solid #1a2333;
-  border-radius: 6px;
+  gap: 8px;
   font-family: var(--font-mono);
   font-size: 12px;
-  line-height: 1.6;
-  padding: 12px;
-  overflow-x: auto;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  outline: none;
+  transition: transform 120ms var(--ease-spring), box-shadow 120ms var(--ease-spring);
 }
 
-.hex-offset {
-  color: #64748b;
-  user-select: none;
+/* Primary: Safety Orange Ignition Trigger */
+.tactile-btn-primary {
+  background: var(--accent);
+  color: var(--accent-fg);
+  box-shadow: var(--shadow-accent-btn);
+  border: 1px solid rgba(255,255,255,0.25);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
-.hex-bytes {
-  color: #38bdf8;
+.tactile-btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
 }
-.hex-ascii {
-  color: #34d399;
+.tactile-btn-primary:active {
+  background: var(--accent-pressed);
+  transform: translateY(2px);
+  box-shadow: var(--shadow-accent-pressed);
+}
+
+/* Secondary: Chassis Molded Key */
+.tactile-btn-chassis {
+  background: var(--chassis);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+.tactile-btn-chassis:hover {
+  transform: translateY(-1px);
+  color: var(--accent);
+  box-shadow: var(--shadow-floating);
+}
+.tactile-btn-chassis:active {
+  transform: translateY(2px);
+  box-shadow: var(--shadow-pressed);
+  color: var(--accent);
+}
+
+/* Recessed / Pressed Toggle */
+.tactile-btn-pressed {
+  background: var(--recessed);
+  color: var(--accent);
+  box-shadow: var(--shadow-pressed);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* ─── Physical LED Indicator Lamps ─── */
+.led-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+.led-indicator::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+}
+
+.led-green {
+  background: #22c55e;
+  box-shadow: var(--glow-green);
+}
+.led-orange {
+  background: #ff4757;
+  box-shadow: var(--glow-orange);
+}
+.led-amber {
+  background: #f59e0b;
+  box-shadow: var(--glow-amber);
+}
+.led-red {
+  background: #ef4444;
+  box-shadow: var(--glow-red);
+}
+
+/* ─── Industrial Recessed Inputs ─── */
+.data-slot-input {
+  background: var(--recessed);
+  border: none;
+  box-shadow: var(--shadow-recessed);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  border-radius: 10px;
+  padding: 10px 16px;
+  outline: none;
+  transition: box-shadow 150ms ease;
+}
+.data-slot-input:focus {
+  box-shadow: var(--shadow-recessed), 0 0 0 2px var(--accent);
+}
+.data-slot-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.65;
+}
+
+/* ─── CRT Screen & Oscilloscope Rasterizer ─── */
+.crt-screen {
+  background: var(--crt-screen-bg);
+  border-radius: 12px;
+  box-shadow: inset 4px 4px 10px rgba(0,0,0,0.8), inset -2px -2px 6px rgba(255,255,255,0.08);
+  border: 2px solid #0d1217;
+  position: relative;
+  overflow: hidden;
+}
+.crt-screen::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 24, 32, 0) 50%, rgba(0, 0, 0, 0.40) 50%);
+  background-size: 100% 4px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* ─── Blueprint / Technical Grid Overlay ─── */
+.blueprint-grid {
+  background-image: 
+    linear-gradient(#babecc 1px, transparent 1px),
+    linear-gradient(90deg, #babecc 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+
+/* ─── Physical Conduit Pipe ─── */
+.conduit-pipe {
+  height: 8px;
+  background: linear-gradient(180deg, #d1d9e6 0%, #a3b1c6 50%, #ffffff 100%);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.8);
+  border-radius: 9999px;
+}
+
+/* ─── Risk Status Plaque ─── */
+.risk-plaque {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1), 1px 1px 1px rgba(255,255,255,0.7);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+.risk-plaque-SECURE     { background: #ecfdf5; color: #047857; border-left: 3px solid #10b981; }
+.risk-plaque-ACCEPTABLE { background: #ecfeff; color: #0e7490; border-left: 3px solid #06b6d4; }
+.risk-plaque-WEAK       { background: #fffbeb; color: #b45309; border-left: 3px solid #f59e0b; }
+.risk-plaque-HIGH       { background: #fff7ed; color: #c2410c; border-left: 3px solid #f97316; }
+.risk-plaque-CRITICAL   { background: #fef2f2; color: #b91c1c; border-left: 3px solid #ef4444; }
+
+/* ─── Scrollbars (Machined Track) ─── */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--recessed); border-radius: 4px; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1); }
+::-webkit-scrollbar-thumb { background: #babecc; border-radius: 4px; border: 1px solid var(--chassis); }
+::-webkit-scrollbar-thumb:hover { background: #a3b1c6; }
+
+/* ─── High-Fidelity Print & Executive PDF Styles ─── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  *, *:before, *:after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #111827 !important;
+    font-size: 11pt !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide navigation, filter matrices, web action buttons, and modal elements */
+  header,
+  nav,
+  .no-print,
+  button,
+  input,
+  .vent-grille {
+    display: none !important;
+  }
+
+  /* Ensure main container takes full width with zero clipping */
+  main,
+  .summary-report-page {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Report Sections & Panels: ensure crisp borders and prevent card splitting */
+  .bolted-panel,
+  .report-section,
+  .print-avoid-break {
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 16px !important;
+    padding: 16px !important;
+  }
+
+  /* Dark technical displays switch to clean bordered light theme on paper */
+  .bolted-panel [style*="var(--dark-panel)"] {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  /* Typography enhancements on print */
+  .tabular-mono,
+  .stamped-label,
+  h1, h2, h3, h4, p, span {
+    color: #0f172a !important;
+  }
+
+  /* Table readability */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  th, td {
+    border: 1px solid #e2e8f0 !important;
+    padding: 6px 8px !important;
+    color: #1e293b !important;
+    font-size: 9pt !important;
+  }
+
+  /* Risk Plaques on print: solid color border */
+  .risk-plaque {
+    border: 1px solid #94a3b8 !important;
+    font-weight: 800 !important;
+    font-size: 9pt !important;
+  }
 }

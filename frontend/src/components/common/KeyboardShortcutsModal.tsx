@@ -1,26 +1,24 @@
 import React from "react";
 import { X, Keyboard } from "lucide-react";
+import { TactileButton } from "./TactileButton";
 
 interface KeyboardShortcutsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
-  isOpen,
-  onClose,
-}) => {
+export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const shortcuts = [
-    { key: "j", desc: "Move session table selection down" },
-    { key: "k", desc: "Move session table selection up" },
-    { key: "Enter / Space", desc: "Open selected session in Forensic Detail view" },
-    { key: "/", desc: "Focus search bar in Session Table" },
-    { key: "v", desc: "Open Analyst Verdict modal for selected session" },
-    { key: "1 - 5", desc: "Switch directly between Views 1 to 5" },
-    { key: "Esc", desc: "Close drawer / modal / clear active filters" },
-    { key: "?", desc: "Toggle this Keyboard Shortcuts cheat-sheet" },
+    { key: "j", desc: "Shift Switchboard table selection down" },
+    { key: "k", desc: "Shift Switchboard table selection up" },
+    { key: "Enter / Space", desc: "Engage stream in Forensic Dissector view" },
+    { key: "/", desc: "Engage filter slot in Switchboard" },
+    { key: "v", desc: "Focus Analyst Verdict stamp control" },
+    { key: "1 – 6", desc: "Switch between console bays 1–6 (6: Summary Report)" },
+    { key: "Esc", desc: "Disengage dialog / clear active filters" },
+    { key: "?", desc: "Toggle this Operator Instruction plate" },
   ];
 
   return (
@@ -28,38 +26,62 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.7)",
-        backdropFilter: "blur(4px)",
+        zIndex: 1000,
+        backgroundColor: "rgba(18, 24, 32, 0.65)",
+        backdropFilter: "blur(6px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 1000,
       }}
       onClick={onClose}
     >
       <div
-        className="card"
+        className="bolted-panel"
         style={{
-          width: 480,
-          background: "#0f172a",
-          border: "1px solid #334155",
-          borderRadius: 10,
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.6)",
-          padding: 24,
+          width: 520,
+          background: "var(--chassis)",
+          borderRadius: 18,
+          boxShadow: "16px 16px 36px rgba(0,0,0,0.4), -8px -8px 24px rgba(255,255,255,0.7)",
+          padding: "26px 30px",
+          border: "1px solid rgba(255,255,255,0.6)",
+          position: "relative",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid var(--border-subtle)", paddingBottom: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Keyboard size={18} color="#38bdf8" />
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: "#f8fafc" }}>Analyst Keyboard Shortcuts</h3>
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, paddingLeft: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                background: "var(--recessed)",
+                boxShadow: "var(--shadow-recessed)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Keyboard size={18} color="var(--accent)" />
+            </div>
+            <div>
+              <div className="tabular-mono" style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)" }}>
+                OPERATOR INSTRUCTION MANUAL
+              </div>
+              <div className="stamped-label" style={{ fontSize: 9.5, color: "var(--accent)" }}>
+                PECFF HARDWARE COMMAND INTERFACE
+              </div>
+            </div>
           </div>
-          <button onClick={onClose} className="btn btn-secondary btn-sm" style={{ padding: "4px 6px" }}>
+
+          <TactileButton variant="chassis" size="sm" onClick={onClose} style={{ padding: "6px 8px" }}>
             <X size={15} />
-          </button>
+          </TactileButton>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* Shortcuts List */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {shortcuts.map((s, idx) => (
             <div
               key={idx}
@@ -67,24 +89,24 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "6px 10px",
-                borderRadius: 6,
-                background: "rgba(255, 255, 255, 0.02)",
-                border: "1px solid rgba(255, 255, 255, 0.05)",
+                padding: "8px 14px",
+                borderRadius: 10,
+                background: "var(--recessed)",
+                boxShadow: "var(--shadow-recessed)",
               }}
             >
-              <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>{s.desc}</span>
+              <span style={{ fontSize: 12, color: "var(--text-primary)", fontWeight: 500 }}>{s.desc}</span>
               <kbd
-                className="font-mono"
+                className="tabular-mono"
                 style={{
-                  background: "#1e293b",
-                  border: "1px solid #475569",
-                  borderRadius: 4,
-                  padding: "2px 8px",
+                  background: "var(--chassis)",
+                  boxShadow: "var(--shadow-card)",
+                  border: "1px solid rgba(255,255,255,0.8)",
+                  borderRadius: 6,
+                  padding: "3px 10px",
                   fontSize: 11,
-                  fontWeight: 600,
-                  color: "#38bdf8",
-                  boxShadow: "0 1px 2px rgba(0, 0, 0, 0.3)",
+                  fontWeight: 700,
+                  color: "var(--accent)",
                 }}
               >
                 {s.key}
@@ -93,10 +115,14 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
           ))}
         </div>
 
-        <div style={{ marginTop: 20, textAlign: "right" }}>
-          <button onClick={onClose} className="btn btn-primary btn-sm">
-            Got it (Esc)
-          </button>
+        {/* Footer */}
+        <div style={{ marginTop: 22, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span className="stamped-label" style={{ fontSize: 9.5, color: "var(--text-muted)" }}>
+            HOTKEY SYSTEM ACTIVE
+          </span>
+          <TactileButton variant="primary" size="md" onClick={onClose}>
+            DISMISS [ESC]
+          </TactileButton>
         </div>
       </div>
     </div>

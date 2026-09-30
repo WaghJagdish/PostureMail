@@ -9,7 +9,7 @@ interface UploadQueueViewProps {
 
 export const UploadQueueView: React.FC<UploadQueueViewProps> = ({
   onAnalysisReady,
-  isMockMode,
+  isMockMode: _isMockMode,
 }) => {
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -50,65 +50,6 @@ export const UploadQueueView: React.FC<UploadQueueViewProps> = ({
 
   const startUpload = async () => {
     if (!file) return;
-
-    if (isMockMode) {
-      // Simulate fast pipeline in demo mode
-      setUploading(true);
-      setActiveTask({
-        task_id: "mock-task-1000",
-        state: "PARSING",
-        progress: 0.25,
-        stage_detail: "Parsing 489,230 packets and reassembling TCP flows",
-        packets_processed: 120000,
-        eta_seconds: 5,
-        analysis_id: "analysis-1000-fixtures",
-      });
-
-      setTimeout(() => {
-        setActiveTask((prev) =>
-          prev
-            ? {
-                ...prev,
-                state: "SCORING",
-                progress: 0.65,
-                stage_detail: "Executing NIST SP 800-57 pure deterministic risk engine",
-                packets_processed: 350000,
-              }
-            : null
-        );
-      }, 1200);
-
-      setTimeout(() => {
-        setActiveTask((prev) =>
-          prev
-            ? {
-                ...prev,
-                state: "SCORING_ML",
-                progress: 0.9,
-                stage_detail: "Scoring 94-dim feature vectors with IsolationForest",
-                packets_processed: 489230,
-              }
-            : null
-        );
-      }, 2400);
-
-      setTimeout(() => {
-        setActiveTask((prev) =>
-          prev
-            ? {
-                ...prev,
-                state: "SUCCESS",
-                progress: 1.0,
-                stage_detail: "Forensic analysis completed successfully",
-                packets_processed: 489230,
-              }
-            : null
-        );
-        setUploading(false);
-        onAnalysisReady("analysis-1000-fixtures");
-      }, 3600);
-      return;
-    }
 
     setUploading(true);
     setErrorMsg(null);

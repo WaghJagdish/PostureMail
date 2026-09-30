@@ -128,19 +128,75 @@ async def upload_pcap(
     task_id = f"task-{analysis_id}"
     _DEDUPLICATED_PCAPS[file_sha256] = analysis_id
 
-    # Enqueue pipeline task
+    # Enqueue pipeline task (Celery with automatic in-process fallback)
+    # We probe the broker with a short ping first — send_task() always returns
+    # a truthy AsyncResult even when Redis is down, so we can't rely on it.
+    dispatched_celery = False
     try:
         from pecff.tasks.celery_app import celery_app
 
-        celery_app.send_task(
-            "pecff.tasks.pipeline.run_forensic_pipeline",
-            args=[analysis_id, object_name, filename, file_sha256, total_bytes],
-            task_id=task_id,
-            queue="pecff.ingest",
-        )
+        ping_replies = celery_app.control.ping(timeout=0.5)
+        if ping_replies:  # At least one worker responded
+            celery_app.send_task(
+                "pecff.tasks.pipeline.run_forensic_pipeline",
+                args=[analysis_id, object_name, filename, file_sha256, total_bytes],
+                task_id=task_id,
+                queue="pecff.ingest",
+            )
+            dispatched_celery = True
     except Exception:
-        # Fallback for offline testing without Celery broker running
-        pass
+        dispatched_celery = False
+
+    if not dispatched_celery:
+        import asyncio
+        from pecff.tasks.pipeline import (
+            parse_and_score_shard_task,
+            finalize_corpus_task,
+            ml_scoring_task,
+            index_and_persist_task,
+        )
+        from pecff.api.routers.tasks import update_task_state
+
+        def run_local_pipeline() -> None:
+            try:
+                update_task_state(
+                    task_id=task_id,
+                    state="PARSING",
+                    progress=0.15,
+                    stage_detail="Parsing and reassembling TCP flows",
+                    analysis_id=analysis_id,
+                )
+                shard_res = parse_and_score_shard_task(analysis_id, object_name, 0, 1)
+                update_task_state(
+                    task_id=task_id,
+                    state="SCORING",
+                    progress=0.60,
+                    stage_detail="Evaluating NIST SP 800-57 pure deterministic risk engine",
+                    analysis_id=analysis_id,
+                )
+                corpus_res = finalize_corpus_task([shard_res], analysis_id, object_name, filename, file_sha256)
+                update_task_state(
+                    task_id=task_id,
+                    state="SCORING_ML",
+                    progress=0.88,
+                    stage_detail="Evaluating 94-dim feature vectors with IsolationForest",
+                    analysis_id=analysis_id,
+                )
+                ml_res = ml_scoring_task(corpus_res)
+                index_and_persist_task(ml_res)
+            except Exception as e:
+                import logging
+                logging.getLogger("pecff.pcaps").error("Local pipeline fallback failed: %s", e, exc_info=True)
+                update_task_state(
+                    task_id=task_id,
+                    state="FAILURE",
+                    progress=1.0,
+                    stage_detail=f"Analysis failed: {e}",
+                    error=str(e),
+                    analysis_id=analysis_id,
+                )
+
+        asyncio.create_task(asyncio.to_thread(run_local_pipeline))
 
     record_audit_log(
         principal=current_user.user_id,
