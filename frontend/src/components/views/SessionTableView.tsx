@@ -231,7 +231,7 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
                     borderBottom: "1px solid rgba(186,190,204,0.35)",
                     borderLeft: isSelected ? "4px solid var(--accent)" : "4px solid transparent",
                     background: isSelected
-                      ? "rgba(255,71,87,0.08)"
+                      ? "rgba(51,65,85,0.12)"
                       : isFocused
                       ? "rgba(186,190,204,0.2)"
                       : virtualRow.index % 2 === 0 ? "var(--chassis)" : "var(--panel)",

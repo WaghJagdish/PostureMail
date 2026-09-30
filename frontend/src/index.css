@@ -27,11 +27,11 @@
   --text-muted:        #636e72;
   --text-light:        #ffffff;
   
-  /* Accent: Braun Safety Orange / Alert Trigger */
-  --accent:            #ff4757;
-  --accent-hover:      #ff5b6a;
-  --accent-pressed:    #e03d4c;
-  --accent-fg:         #ffffff;
+  /* Accent: Precision Metallic Titanium / Gunmetal Slate */
+  --accent:            #334155;
+  --accent-hover:      #1e293b;
+  --accent-pressed:    #0f172a;
+  --accent-fg:         #f8fafc;
 
   /* Neumorphic Lighting Dual Shadows (Top-Left 45° Illuminant) */
   --shadow-light:      #ffffff;
@@ -45,10 +45,10 @@
   --shadow-sharp:      4px 4px 8px rgba(0,0,0,0.14), -1px -1px 1px rgba(255,255,255,0.8);
   
   /* Colored Button & Status Glows */
-  --shadow-accent-btn: 5px 5px 12px rgba(255, 71, 87, 0.40), -4px -4px 8px #ffffff;
-  --shadow-accent-pressed: inset 4px 4px 8px rgba(160, 30, 40, 0.55), inset -3px -3px 6px rgba(255, 120, 130, 0.45);
+  --shadow-accent-btn: 4px 4px 10px rgba(15, 23, 42, 0.22), -3px -3px 8px #ffffff;
+  --shadow-accent-pressed: inset 3px 3px 6px rgba(0, 0, 0, 0.45), inset -2px -2px 4px rgba(255, 255, 255, 0.12);
   
-  --glow-orange:       0 0 12px 2px rgba(255, 71, 87, 0.65);
+  --glow-orange:       0 0 10px 1px rgba(51, 65, 85, 0.5);
   --glow-green:        0 0 10px 2px rgba(34, 197, 94, 0.70);
   --glow-amber:        0 0 10px 2px rgba(245, 158, 11, 0.70);
   --glow-red:          0 0 12px 2px rgba(239, 68, 68, 0.80);
@@ -233,22 +233,26 @@ h1, h2, h3, h4, h5, h6 {
   transition: transform 120ms var(--ease-spring), box-shadow 120ms var(--ease-spring);
 }
 
-/* Primary: Safety Orange Ignition Trigger */
+/* Primary: Precision Metallic Titanium Trigger */
 .tactile-btn-primary {
-  background: var(--accent);
-  color: var(--accent-fg);
-  box-shadow: var(--shadow-accent-btn);
-  border: 1px solid rgba(255,255,255,0.25);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  background: linear-gradient(180deg, #3d4a5c 0%, #1e2531 100%);
+  color: #f8fafc;
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.22), -2px -2px 6px rgba(255,255,255,0.7), inset 0 1px 0 rgba(255,255,255,0.25);
+  border: 1px solid rgba(15, 23, 42, 0.9);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  font-weight: 700;
+  letter-spacing: 0.05em;
 }
 .tactile-btn-primary:hover {
-  background: var(--accent-hover);
+  background: linear-gradient(180deg, #4f5f75 0%, #2a3444 100%);
   transform: translateY(-1px);
+  box-shadow: 6px 6px 14px rgba(0,0,0,0.25), -3px -3px 8px rgba(255,255,255,0.85), inset 0 1px 0 rgba(255,255,255,0.35);
+  color: #ffffff;
 }
 .tactile-btn-primary:active {
-  background: var(--accent-pressed);
+  background: linear-gradient(180deg, #13171f 0%, #202734 100%);
   transform: translateY(2px);
-  box-shadow: var(--shadow-accent-pressed);
+  box-shadow: inset 3px 3px 6px rgba(0,0,0,0.6), inset -2px -2px 4px rgba(255,255,255,0.1);
 }
 
 /* Secondary: Chassis Molded Key */
@@ -301,7 +305,7 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--glow-green);
 }
 .led-orange {
-  background: #ff4757;
+  background: #d97706;
   box-shadow: var(--glow-orange);
 }
 .led-amber {

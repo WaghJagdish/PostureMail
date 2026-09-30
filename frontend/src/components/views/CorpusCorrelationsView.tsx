@@ -462,7 +462,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
                     style={{
                       borderBottom: "1px solid rgba(186,190,204,0.35)",
                       cursor: "pointer",
-                      background: isSelected ? "rgba(255, 71, 87, 0.08)" : undefined,
+                      background: isSelected ? "rgba(51, 65, 85, 0.12)" : undefined,
                       borderLeft: isSelected ? "3px solid var(--accent)" : "3px solid transparent",
                     }}
                   >

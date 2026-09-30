@@ -75,24 +75,16 @@ export const AppNav: React.FC<AppNavProps> = ({
           title="Return to System Root"
         >
           <img
-            src="/relic-logo.png"
-            alt=""
-            style={{ width: 22, height: 22, objectFit: "contain", filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.2))" }}
+            src="/relic-logo.png?v=2"
+            alt="Relic"
+            style={{ width: 22, height: 22, objectFit: "contain", filter: "drop-shadow(0 1px 2px rgba(15, 23, 42, 0.2))" }}
           />
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", lineHeight: 1.1 }}>
-            <span
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontWeight: 800,
-                fontSize: 13,
-                letterSpacing: "0.08em",
-                color: "var(--text-primary)",
-                textTransform: "uppercase",
-              }}
-              className="text-embossed-light"
-            >
-              RELIC-01
-            </span>
+            <img
+              src="/relic-wordmark.png?v=2"
+              alt="RELIC"
+              style={{ height: 13, width: "auto", objectFit: "contain", filter: "drop-shadow(0 1px 1px rgba(15, 23, 42, 0.18))" }}
+            />
             <span
               style={{
                 fontFamily: "var(--font-mono)",

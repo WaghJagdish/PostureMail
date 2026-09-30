@@ -433,8 +433,8 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onAnalysisReady, o
                     ? "linear-gradient(90deg, #10b981, #22c55e)"
                     : activeTask.state === "FAILURE"
                     ? "#ef4444"
-                    : "linear-gradient(90deg, var(--accent), #ff7a88)",
-                  boxShadow: "0 0 10px rgba(255,71,87,0.8)",
+                    : "linear-gradient(90deg, #334155, #64748b)",
+                  boxShadow: "0 0 10px rgba(51,65,85,0.6)",
                   transition: "width 0.4s var(--ease-spring)",
                 }}
               />

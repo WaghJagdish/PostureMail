@@ -61,11 +61,11 @@ const OscilloscopeCanvas: React.FC = () => {
       }
       ctx.stroke();
 
-      // Signal wave 2 (Safety Orange STARTTLS Transition Peak)
+      // Signal wave 2 (Metallic Slate Steel STARTTLS Transition Peak)
       ctx.beginPath();
-      ctx.strokeStyle = "#ff4757";
+      ctx.strokeStyle = "#64748b";
       ctx.lineWidth = 1.5;
-      ctx.shadowColor = "#ff4757";
+      ctx.shadowColor = "#64748b";
       ctx.shadowBlur = 6;
       for (let x = 0; x < W; x++) {
         const y =
@@ -137,22 +137,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterConsole, onGoTo
             }}
           >
             <img
-              src="/relic-logo.png"
+              src="/relic-logo.png?v=2"
               alt="Relic Logo"
-              style={{ width: 24, height: 24, objectFit: "contain" }}
+              style={{ width: 24, height: 24, objectFit: "contain", filter: "drop-shadow(0 1px 2px rgba(15, 23, 42, 0.15))" }}
             />
-            <span
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: 14,
-                fontWeight: 800,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-              }}
-              className="text-embossed-light"
-            >
-              RELIC-01
-            </span>
+            <img
+              src="/relic-wordmark.png?v=2"
+              alt="RELIC"
+              style={{ height: 15, width: "auto", objectFit: "contain", filter: "drop-shadow(0 1px 1px rgba(15, 23, 42, 0.18))" }}
+            />
             <span
               className="stamped-label"
               style={{
@@ -239,11 +232,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterConsole, onGoTo
               lineHeight: 1.12,
               letterSpacing: "-0.03em",
               marginBottom: 18,
+              color: "#0f172a",
             }}
-            className="text-embossed-light"
           >
             Passive Email <br />
-            <span style={{ color: "var(--accent)" }}>Cryptographic Forensics</span>
+            <span
+              style={{
+                color: "#475569",
+                display: "inline-block",
+                textShadow: "0 1px 1px rgba(255,255,255,0.9)",
+              }}
+            >
+              Cryptographic Forensics
+            </span>
           </h1>
 
           <p
@@ -644,15 +645,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterConsole, onGoTo
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <img
-            src="/relic-logo.png"
+            src="/relic-logo.png?v=2"
             alt="Relic"
-            style={{ width: 22, height: 22, objectFit: "contain", opacity: 0.8 }}
+            style={{ width: 22, height: 22, objectFit: "contain", opacity: 0.9 }}
           />
           <span
             className="stamped-label"
             style={{ fontSize: 11, color: "var(--text-primary)" }}
           >
-            RELIC PECFF FORENSICS · UNIT S/N #2026-SIH-01
+            RELIC PECFF FORENSICS · UNIT S/N #2026-SIH
           </span>
         </div>
         <div
