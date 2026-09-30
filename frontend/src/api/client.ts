@@ -153,7 +153,7 @@ export interface AnalysisDetailResponse {
   findings: FindingSchema[];
 }
 
-const API_BASE = "";
+const API_BASE = "https://posturemail-api.onrender.com";
 
 // -----------------------------------------------------------------------------
 // Live API Methods
