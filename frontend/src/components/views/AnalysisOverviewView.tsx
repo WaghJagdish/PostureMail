@@ -1,26 +1,9 @@
 import React, { useState, useMemo } from "react";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  LineChart,
-  Line,
-  CartesianGrid,
+  PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, LineChart, Line, CartesianGrid, Legend,
 } from "recharts";
-import {
-  ShieldAlert,
-  AlertTriangle,
-  Lock,
-  Activity,
-  Layers,
-  Filter,
-} from "lucide-react";
+import { ShieldAlert, AlertTriangle, Lock, Activity, Layers, Filter, TrendingUp, Globe } from "lucide-react";
 import { AnalysisDetailResponse, SessionDetailSchema, FindingSchema } from "../../api/client";
 
 interface AnalysisOverviewViewProps {
@@ -29,405 +12,404 @@ interface AnalysisOverviewViewProps {
 }
 
 const RISK_BAND_COLORS: Record<string, string> = {
-  CRITICAL: "#ef4444",
-  HIGH: "#f97316",
-  WEAK: "#eab308",
-  ACCEPTABLE: "#10b981",
-  SECURE: "#06b6d4",
+  CRITICAL: "#dc2626",
+  HIGH: "#ea580c",
+  WEAK: "#d97706",
+  ACCEPTABLE: "#059669",
+  SECURE: "#0891b2",
 };
 
-export const AnalysisOverviewView: React.FC<AnalysisOverviewViewProps> = ({
-  analysis,
-  onFilterSessions,
-}) => {
+const RISK_BG: Record<string, string> = {
+  CRITICAL: "#fef2f2", HIGH: "#fff7ed", WEAK: "#fffbeb", ACCEPTABLE: "#ecfdf5", SECURE: "#ecfeff",
+};
+
+// ── Reusable card header ──
+const SectionHeader: React.FC<{ icon: React.ReactNode; title: string; subtitle?: React.ReactNode }> = ({ icon, title, subtitle }) => (
+  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {icon}
+      </div>
+      <span className="font-display" style={{ fontSize: 14.5, fontWeight: 700, color: "#0d1b2e", letterSpacing: "-0.02em" }}>{title}</span>
+    </div>
+    {subtitle && <div className="font-sans" style={{ fontSize: 12, color: "#64748b" }}>{subtitle}</div>}
+  </div>
+);
+
+// ── KPI metric card ──
+const MetricCard: React.FC<{
+  label: string; value: string | number; sub?: string;
+  accent: string; accentBg: string; icon: React.ReactNode; band?: string;
+}> = ({ label, value, sub, accent, accentBg, icon, band }) => (
+  <div style={{
+    background: "#fff", border: "1px solid #e2e6f0", borderRadius: 12,
+    padding: "16px 20px", boxShadow: "0 1px 4px rgba(15,23,42,0.06)",
+    display: "flex", flexDirection: "column", gap: 8,
+    borderTop: `3px solid ${accent}`,
+  }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <span className="text-eyebrow" style={{ fontSize: 11, color: "#64748b" }}>{label}</span>
+      <div style={{ width: 30, height: 30, borderRadius: 8, background: accentBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {icon}
+      </div>
+    </div>
+    <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+      <span className="text-kpi font-display tabular-nums" style={{ color: accent }}>{value}</span>
+      {sub && <span className="font-sans" style={{ fontSize: 12, color: "#94a3b8" }}>{sub}</span>}
+    </div>
+    {band && (
+      <span className={`badge badge-${band}`} style={{ alignSelf: "flex-start", marginTop: 2 }}>{band}</span>
+    )}
+  </div>
+);
+
+// ── Custom tooltip ──
+const ChartTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: "#fff", border: "1px solid #e2e6f0", borderRadius: 8, padding: "8px 12px", boxShadow: "0 4px 12px rgba(15,23,42,0.1)", fontSize: 12 }}>
+      {label && <div style={{ fontWeight: 600, color: "#0f172a", marginBottom: 4 }}>{label}</div>}
+      {payload.map((p: any, i: number) => (
+        <div key={i} style={{ color: p.color || "#475569" }}>{p.name}: <strong>{p.value}</strong></div>
+      ))}
+    </div>
+  );
+};
+
+export const AnalysisOverviewView: React.FC<AnalysisOverviewViewProps> = ({ analysis, onFilterSessions }) => {
   const [timeBucket, setTimeBucket] = useState<"1h" | "1d" | "1w">("1h");
 
-  // 1. Risk Distribution Data for Donut Chart
+  // 1. Risk distribution
   const riskDistribution = useMemo(() => {
-    const counts: Record<string, number> = {
-      CRITICAL: 0,
-      HIGH: 0,
-      WEAK: 0,
-      ACCEPTABLE: 0,
-      SECURE: 0,
-    };
-    analysis.sessions.forEach((s: SessionDetailSchema) => {
-      counts[s.risk_band] = (counts[s.risk_band] || 0) + 1;
-    });
-    return Object.keys(counts).map((band) => ({
-      name: band,
-      value: counts[band],
-      color: RISK_BAND_COLORS[band],
-    }));
+    const counts: Record<string, number> = { CRITICAL: 0, HIGH: 0, WEAK: 0, ACCEPTABLE: 0, SECURE: 0 };
+    analysis.sessions.forEach((s: SessionDetailSchema) => { counts[s.risk_band] = (counts[s.risk_band] || 0) + 1; });
+    return Object.keys(counts).map((band) => ({ name: band, value: counts[band], color: RISK_BAND_COLORS[band] }));
   }, [analysis.sessions]);
 
-  // 2. STARTTLS Health per Destination MX (sorted worst upgrade rate first)
+  // 2. STARTTLS health per MX
   const starttlsHealth = useMemo(() => {
-    const mxMap: Record<string, { total: number; encrypted: number; stripped: number; refused: number }> = {};
+    const mxMap: Record<string, { total: number; encrypted: number; stripped: number }> = {};
     analysis.sessions.forEach((s: SessionDetailSchema) => {
       const mx = s.sni || s.server_ip;
-      if (!mxMap[mx]) {
-        mxMap[mx] = { total: 0, encrypted: 0, stripped: 0, refused: 0 };
-      }
+      if (!mxMap[mx]) mxMap[mx] = { total: 0, encrypted: 0, stripped: 0 };
       mxMap[mx].total += 1;
-      if (s.starttls_state === "S4_ENCRYPTED" || s.mode === "IMPLICIT") {
-        mxMap[mx].encrypted += 1;
-      } else if (s.starttls_state === "S_STRIP_DETECTED") {
-        mxMap[mx].stripped += 1;
-      } else {
-        mxMap[mx].refused += 1;
-      }
+      if (s.starttls_state === "S4_ENCRYPTED" || s.mode === "IMPLICIT") mxMap[mx].encrypted += 1;
+      else if (s.starttls_state === "S_STRIP_DETECTED") mxMap[mx].stripped += 1;
     });
-
     return Object.entries(mxMap)
       .map(([mx, stats]) => ({
-        mx: mx.length > 22 ? mx.substring(0, 20) + "..." : mx,
+        mx: mx.length > 20 ? mx.substring(0, 18) + "…" : mx,
         fullMx: mx,
         successRate: Math.round((stats.encrypted / stats.total) * 100),
-        stripped: stats.stripped,
-        refused: stats.refused,
+        strippedRate: Math.round((stats.stripped / stats.total) * 100),
         total: stats.total,
       }))
       .sort((a, b) => a.successRate - b.successRate)
-      .slice(0, 8);
+      .slice(0, 7);
   }, [analysis.sessions]);
 
-  // 3. TLS Version & Cipher Suite Distribution
+  // 3. TLS versions
   const tlsVersions = useMemo(() => {
     const map: Record<string, number> = {};
     analysis.sessions.forEach((s: SessionDetailSchema) => {
-      const v = s.risk_score <= 15 ? "TLS 1.3" : s.risk_score <= 40 ? "TLS 1.2" : s.risk_score <= 75 ? "TLS 1.0" : "SSL 3.0 / Plain";
+      const v = s.risk_score <= 15 ? "TLS 1.3" : s.risk_score <= 40 ? "TLS 1.2" : s.risk_score <= 75 ? "TLS 1.0" : "SSL / Plain";
       map[v] = (map[v] || 0) + 1;
     });
-    return Object.entries(map).map(([ver, count]) => ({ version: ver, count }));
+    const total = analysis.sessions.length || 1;
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .map(([ver, count]) => ({
+        version: ver,
+        count,
+        pct: Math.round((count / total) * 100),
+        color: ver === "TLS 1.3" ? "#059669" : ver === "TLS 1.2" ? "#0891b2" : ver === "TLS 1.0" ? "#d97706" : "#dc2626",
+      }));
   }, [analysis.sessions]);
 
-  // 4. JA3 Top Frequencies with First/Last Seen
+  // 4. JA3 fingerprints
   const ja3Frequencies = useMemo(() => {
-    const map: Record<string, { count: number; first: number; last: number; ja3: string }> = {};
+    const map: Record<string, { count: number; first: number; last: number }> = {};
     analysis.sessions.forEach((s: SessionDetailSchema) => {
       if (s.ja3) {
-        const key = s.ja3;
-        if (!map[key]) {
-          map[key] = { count: 0, first: s.first_seen, last: s.first_seen, ja3: s.ja3 };
-        }
-        map[key].count += 1;
-        map[key].first = Math.min(map[key].first, s.first_seen);
-        map[key].last = Math.max(map[key].last, s.first_seen);
+        if (!map[s.ja3]) map[s.ja3] = { count: 0, first: s.first_seen, last: s.first_seen };
+        map[s.ja3].count += 1;
+        map[s.ja3].first = Math.min(map[s.ja3].first, s.first_seen);
+        map[s.ja3].last = Math.max(map[s.ja3].last, s.first_seen);
       }
     });
-    return Object.values(map)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
+    return Object.entries(map)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 5)
+      .map(([ja3, data]) => ({ ja3, ...data }));
   }, [analysis.sessions]);
 
-  // 5. Time-Series Risk Trend
+  // 5. Time-series trend
   const timeSeriesTrend = useMemo(() => {
-    if (analysis.sessions.length === 0) return [];
+    if (!analysis.sessions.length) return [];
     const sorted = [...analysis.sessions].sort((a, b) => a.first_seen - b.first_seen);
     const minTime = sorted[0].first_seen;
     const maxTime = sorted[sorted.length - 1].first_seen;
-
-    // Number of display buckets depends on the selected time granularity
     const numBuckets = timeBucket === "1h" ? 12 : timeBucket === "1d" ? 24 : 28;
     const interval = Math.max(1, (maxTime - minTime) / numBuckets);
-
-    const buckets: { timeLabel: string; avgScore: number; criticalCount: number }[] = [];
-    for (let i = 0; i < numBuckets; i++) {
+    return Array.from({ length: numBuckets }, (_, i) => {
       const bStart = minTime + i * interval;
       const bEnd = bStart + interval;
-      const bucketSessions = sorted.filter((s) => s.first_seen >= bStart && s.first_seen < bEnd);
-      const avg = bucketSessions.length
-        ? Math.round(bucketSessions.reduce((acc, s) => acc + s.risk_score, 0) / bucketSessions.length)
-        : 0;
-      const crit = bucketSessions.filter((s) => s.risk_band === "CRITICAL").length;
+      const bucket = sorted.filter((s) => s.first_seen >= bStart && s.first_seen < bEnd);
       const d = new Date(bStart * 1000);
-      buckets.push({
-        timeLabel: `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`,
-        avgScore: avg,
-        criticalCount: crit,
-      });
-    }
-    return buckets;
+      return {
+        t: `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`,
+        risk: bucket.length ? Math.round(bucket.reduce((a, s) => a + s.risk_score, 0) / bucket.length) : 0,
+        critical: bucket.filter((s) => s.risk_band === "CRITICAL").length,
+        sessions: bucket.length,
+      };
+    });
   }, [analysis.sessions, timeBucket]);
 
+  const criticalCount = analysis.findings.filter((f: FindingSchema) => f.severity === "CRITICAL").length;
+  const anomalyCount = analysis.sessions.filter((s: SessionDetailSchema) => s.is_anomaly).length;
+
   return (
-    <div style={{ padding: "8px 16px", maxWidth: 1400, margin: "0 auto" }}>
-      {/* Top Metric Bar */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12, marginBottom: 16 }}>
-        <div className="card" style={{ padding: "12px 16px", borderLeft: "4px solid #ef4444" }}>
-          <div style={{ fontSize: 11, textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 600 }}>Overall Risk Score</div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 4 }}>
-            <span style={{ fontSize: 24, fontWeight: 800, color: RISK_BAND_COLORS[analysis.overall_risk_band] }}>
-              {analysis.overall_risk_score.toFixed(1)}
-            </span>
-            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>/ 100</span>
-            <span className={`badge badge-${analysis.overall_risk_band}`} style={{ marginLeft: "auto" }}>
-              {analysis.overall_risk_band}
-            </span>
-          </div>
-        </div>
+    <div style={{ maxWidth: 1400, margin: "0 auto" }}>
 
-        <div className="card" style={{ padding: "12px 16px" }}>
-          <div style={{ fontSize: 11, textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 600 }}>Total Sessions</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#f8fafc", marginTop: 4 }}>
-            {analysis.total_sessions.toLocaleString()}
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: "12px 16px" }}>
-          <div style={{ fontSize: 11, textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 600 }}>Total Packets</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#38bdf8", marginTop: 4 }}>
-            {analysis.total_packets.toLocaleString()}
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: "12px 16px" }}>
-          <div style={{ fontSize: 11, textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 600 }}>Cryptographic Findings</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#f59e0b", marginTop: 4 }}>
-            {analysis.findings.length}
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: "12px 16px" }}>
-          <div style={{ fontSize: 11, textTransform: "uppercase", color: "var(--text-muted)", fontWeight: 600 }}>Anomalous Flows</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: "#a855f7", marginTop: 4 }}>
-            {analysis.sessions.filter((s: SessionDetailSchema) => s.is_anomaly).length}
-          </div>
-        </div>
+      {/* ── KPI Row ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 14, marginBottom: 24 }}>
+        <MetricCard
+          label="Overall Risk Score" value={analysis.overall_risk_score.toFixed(1)} sub="/ 100"
+          accent={RISK_BAND_COLORS[analysis.overall_risk_band]}
+          accentBg={RISK_BG[analysis.overall_risk_band]}
+          icon={<ShieldAlert size={16} color={RISK_BAND_COLORS[analysis.overall_risk_band]} />}
+          band={analysis.overall_risk_band}
+        />
+        <MetricCard
+          label="Total Sessions" value={analysis.total_sessions.toLocaleString()}
+          accent="#2563eb" accentBg="#dbeafe"
+          icon={<Activity size={16} color="#2563eb" />}
+        />
+        <MetricCard
+          label="Total Packets" value={analysis.total_packets.toLocaleString()}
+          accent="#0891b2" accentBg="#ecfeff"
+          icon={<Globe size={16} color="#0891b2" />}
+        />
+        <MetricCard
+          label="Critical Findings" value={criticalCount} sub={`of ${analysis.findings.length}`}
+          accent="#dc2626" accentBg="#fef2f2"
+          icon={<AlertTriangle size={16} color="#dc2626" />}
+        />
+        <MetricCard
+          label="Anomalous Flows (ML)" value={anomalyCount}
+          accent="#7c3aed" accentBg="#f5f3ff"
+          icon={<TrendingUp size={16} color="#7c3aed" />}
+        />
       </div>
 
-      {/* Row 1: Interactive Donut & Top Findings */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1.9fr", gap: 16, marginBottom: 16 }}>
-        {/* Risk Distribution Donut (Interactive Filter) */}
-        <div className="card" style={{ padding: 18 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
-              <ShieldAlert size={16} color="#38bdf8" />
-              Risk Distribution (Click to Filter)
-            </h3>
-            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>NIST SP 800-57 Bands</span>
-          </div>
+      {/* ── Row 1: Donut + Findings table ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: 16, marginBottom: 16 }}>
 
-          <div style={{ height: 210, width: "100%", display: "flex", alignItems: "center" }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={riskDistribution}
-                  innerRadius={55}
-                  outerRadius={80}
-                  paddingAngle={3}
-                  dataKey="value"
-                  cursor="pointer"
-                  onClick={(entry) => onFilterSessions({ risk_band: entry.name })}
-                >
-                  {riskDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ background: "#0f172a", borderColor: "#334155", borderRadius: 6, fontSize: 12 }}
-                  formatter={(val: any, name: any) => [`${val} sessions (${Math.round((Number(val) / (analysis.total_sessions || 1)) * 100)}%)`, String(name)]}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, minWidth: 130 }}>
-              {riskDistribution.map((r) => (
-                <div
-                  key={r.name}
-                  onClick={() => onFilterSessions({ risk_band: r.name })}
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 11.5, cursor: "pointer", padding: "2px 6px", borderRadius: 4, background: "rgba(255,255,255,0.02)" }}
-                  title={`Filter table to ${r.name}`}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: r.color }} />
-                    <span style={{ color: "#f8fafc", fontWeight: 500 }}>{r.name}</span>
-                  </div>
-                  <span className="font-mono" style={{ color: "var(--text-muted)", fontWeight: 600 }}>{r.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Top Forensic Findings Table */}
-        <div className="card" style={{ padding: 18, overflowX: "auto" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
-              <AlertTriangle size={16} color="#f59e0b" />
-              Critical Forensic Findings & Policy Vetoes ({analysis.findings.length})
-            </h3>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => onFilterSessions({ risk_band: "CRITICAL" })}
-              style={{ fontSize: 11 }}
-            >
-              <Filter size={12} />
-              View Critical Flows
-            </button>
-          </div>
-
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid var(--border-subtle)", textAlign: "left", color: "var(--text-muted)", fontSize: 11 }}>
-                <th style={{ padding: "6px 8px" }}>Severity</th>
-                <th style={{ padding: "6px 8px" }}>Rule ID</th>
-                <th style={{ padding: "6px 8px" }}>Finding Description</th>
-                <th style={{ padding: "6px 8px" }}>Standard Reference</th>
-                <th style={{ padding: "6px 8px", textAlign: "right" }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {analysis.findings.slice(0, 5).map((f: FindingSchema) => (
-                <tr key={f.id} style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.04)" }}>
-                  <td style={{ padding: "8px 8px" }}>
-                    <span className={`badge badge-${f.severity}`}>{f.severity}</span>
-                  </td>
-                  <td className="font-mono" style={{ padding: "8px 8px", color: "#38bdf8", fontSize: 11 }}>
-                    {f.rule_id}
-                  </td>
-                  <td style={{ padding: "8px 8px", color: "#f8fafc", maxWidth: 280 }}>
-                    <b>{f.title}</b>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {f.description}
-                    </div>
-                  </td>
-                  <td style={{ padding: "8px 8px", color: "var(--text-secondary)", fontSize: 11 }}>
-                    {f.standards_ref}
-                  </td>
-                  <td style={{ padding: "8px 8px", textAlign: "right" }}>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => onFilterSessions({ search: f.session_id })}
-                      style={{ padding: "2px 6px", fontSize: 10.5 }}
-                    >
-                      Inspect &rarr;
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Row 2: STARTTLS MX Health & Time Series Trend */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
-        {/* STARTTLS Health per MX */}
-        <div className="card" style={{ padding: 18 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
-              <Lock size={16} color="#10b981" />
-              STARTTLS Upgrade Health per Destination MX (Worst First)
-            </h3>
-            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Success %</span>
-          </div>
-
-          <div style={{ height: 210, width: "100%" }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={starttlsHealth} layout="vertical" margin={{ left: 10, right: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis type="number" domain={[0, 100]} stroke="#64748b" fontSize={11} unit="%" />
-                <YAxis dataKey="mx" type="category" stroke="#94a3b8" fontSize={11} width={130} />
-                <Tooltip
-                  contentStyle={{ background: "#0f172a", borderColor: "#334155", borderRadius: 6, fontSize: 12 }}
-                  formatter={(val: any) => [`${val}% Upgrade Success`, "Health"]}
-                />
-                <Bar
-                  dataKey="successRate"
-                  fill="#0284c7"
-                  radius={[0, 4, 4, 0]}
-                  cursor="pointer"
-                  onClick={(data: any) => onFilterSessions({ search: data.fullMx })}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Risk Trend over Capture Duration */}
-        <div className="card" style={{ padding: 18 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", gap: 6 }}>
-              <Activity size={16} color="#38bdf8" />
-              Cryptographic Risk Trend Over Time
-            </h3>
-            <div style={{ display: "flex", gap: 4 }}>
-              {(["1h", "1d", "1w"] as const).map((b) => (
-                <button
-                  key={b}
-                  onClick={() => setTimeBucket(b)}
-                  className={`btn btn-sm ${timeBucket === b ? "btn-primary" : "btn-secondary"}`}
-                  style={{ padding: "2px 8px", fontSize: 10.5 }}
-                >
-                  {b}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div style={{ height: 210, width: "100%" }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={timeSeriesTrend} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="timeLabel" stroke="#64748b" fontSize={11} />
-                <YAxis domain={[0, 100]} stroke="#64748b" fontSize={11} />
-                <Tooltip contentStyle={{ background: "#0f172a", borderColor: "#334155", borderRadius: 6, fontSize: 12 }} />
-                <Line type="monotone" dataKey="avgScore" name="Avg Risk Score" stroke="#38bdf8" strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="monotone" dataKey="criticalCount" name="Critical Events" stroke="#ef4444" strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* Row 3: TLS Versions & JA3 Top Fingerprints */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        {/* TLS Versions */}
-        <div className="card" style={{ padding: 18 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-            <Layers size={16} color="#a855f7" />
-            Protocol & TLS Version Distribution
-          </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {tlsVersions.map((t) => (
-              <div
-                key={t.version}
-                onClick={() => onFilterSessions({ search: t.version })}
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 6, background: "rgba(0,0,0,0.25)", border: "1px solid var(--border-subtle)", cursor: "pointer" }}
+        {/* Risk Donut */}
+        <div style={{ background: "#fff", border: "1px solid #e2e6f0", borderRadius: 12, padding: 20, boxShadow: "0 1px 4px rgba(15,23,42,0.06)" }}>
+          <SectionHeader icon={<ShieldAlert size={16} color="#dc2626" />} title="Risk Distribution" subtitle="Click to filter" />
+          <ResponsiveContainer width="100%" height={180}>
+            <PieChart>
+              <Pie data={riskDistribution} innerRadius={52} outerRadius={78} paddingAngle={2} dataKey="value"
+                cursor="pointer" onClick={(e) => onFilterSessions({ risk_band: e.name })}>
+                {riskDistribution.map((entry, i) => (
+                  <Cell key={i} fill={entry.color} stroke="#fff" strokeWidth={2} />
+                ))}
+              </Pie>
+              <Tooltip content={<ChartTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 8 }}>
+            {riskDistribution.filter(r => r.value > 0).map((r) => (
+              <div key={r.name} onClick={() => onFilterSessions({ risk_band: r.name })}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "6px 10px", borderRadius: 8, cursor: "pointer",
+                  background: RISK_BG[r.name], border: `1px solid ${r.color}22`,
+                  transition: "opacity 0.15s",
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.opacity = "0.8"}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.opacity = "1"}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span className="badge badge-SECURE" style={{ background: t.version.includes("1.3") ? "rgba(6,182,212,0.15)" : "#1e293b" }}>{t.version}</span>
+                  <span style={{ width: 10, height: 10, borderRadius: 3, background: r.color, display: "inline-block" }} />
+                  <span style={{ fontSize: 12.5, fontWeight: 600, color: r.color }}>{r.name}</span>
                 </div>
-                <span className="font-mono" style={{ fontWeight: 700, color: "#f8fafc" }}>{t.count} sessions</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#0f172a", fontFamily: "JetBrains Mono, monospace" }}>{r.value}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Top JA3 Fingerprints */}
-        <div className="card" style={{ padding: 18 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
-            <Activity size={16} color="#38bdf8" />
-            Top JA3 Client Fingerprints
-          </h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {ja3Frequencies.map((j) => (
-              <div
-                key={j.ja3}
-                onClick={() => onFilterSessions({ search: j.ja3 })}
-                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 6, background: "rgba(0,0,0,0.25)", border: "1px solid var(--border-subtle)", cursor: "pointer" }}
+        {/* Critical Findings table */}
+        <div style={{ background: "#fff", border: "1px solid #e2e6f0", borderRadius: 12, padding: 20, boxShadow: "0 1px 4px rgba(15,23,42,0.06)", overflow: "hidden" }}>
+          <SectionHeader
+            icon={<AlertTriangle size={16} color="#d97706" />}
+            title={`Critical Forensic Findings (${analysis.findings.length})`}
+            subtitle={
+              <button className="btn btn-secondary btn-sm" onClick={() => onFilterSessions({ risk_band: "CRITICAL" })} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <Filter size={12} /> View Critical
+              </button>
+            }
+          />
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr className="font-display" style={{ borderBottom: "2px solid #f1f5f9" }}>
+                  {["Severity", "Rule ID", "Finding", "Reference", ""].map((h) => (
+                    <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {analysis.findings.slice(0, 6).map((f: FindingSchema) => (
+                  <tr key={f.id} style={{ borderBottom: "1px solid #f8fafc", transition: "background 0.1s" }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = "#fafbfc"}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = "transparent"}
+                  >
+                    <td style={{ padding: "10px 12px" }}>
+                      <span className={`badge badge-${f.severity}`}>{f.severity}</span>
+                    </td>
+                    <td className="crypto-hash" style={{ padding: "10px 12px", fontWeight: 600 }}>{f.rule_id}</td>
+                    <td style={{ padding: "10px 12px", maxWidth: 260 }}>
+                      <div style={{ fontWeight: 600, color: "#0f172a", fontSize: 13 }}>{f.title}</div>
+                      <div style={{ fontSize: 11.5, color: "#64748b", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.description}</div>
+                    </td>
+                    <td style={{ padding: "10px 12px", fontSize: 11.5, color: "#64748b" }}>{f.standards_ref}</td>
+                    <td style={{ padding: "10px 12px" }}>
+                      <button className="btn btn-secondary btn-sm" onClick={() => onFilterSessions({ search: f.session_id })}
+                        style={{ fontSize: 11, padding: "3px 8px", whiteSpace: "nowrap" }}>
+                        Inspect →
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {analysis.findings.length === 0 && (
+                  <tr><td colSpan={5} style={{ padding: "24px", textAlign: "center", color: "#64748b", fontSize: 13 }}>No findings detected</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Row 2: STARTTLS Bar + Risk Trend Line ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+
+        {/* STARTTLS health bar chart */}
+        <div style={{ background: "#fff", border: "1px solid #e2e6f0", borderRadius: 12, padding: 20, boxShadow: "0 1px 4px rgba(15,23,42,0.06)" }}>
+          <SectionHeader icon={<Lock size={16} color="#059669" />} title="STARTTLS Upgrade Health by MX" subtitle="Worst first • Click to filter" />
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={starttlsHealth} layout="vertical" margin={{ left: 0, right: 20, top: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+              <XAxis type="number" domain={[0, 100]} stroke="#cbd5e1" fontSize={11} unit="%" tick={{ fill: "#94a3b8" }} />
+              <YAxis dataKey="mx" type="category" stroke="#f1f5f9" fontSize={11} width={120} tick={{ fill: "#475569" }} />
+              <Tooltip content={<ChartTooltip />} formatter={(v: any) => [`${v}%`, "Upgrade Success"]} />
+              <Bar dataKey="successRate" name="Upgrade %" fill="#2563eb" radius={[0, 4, 4, 0]} cursor="pointer"
+                onClick={(d: any) => onFilterSessions({ search: d.fullMx })} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Risk trend line chart */}
+        <div style={{ background: "#fff", border: "1px solid #e2e6f0", borderRadius: 12, padding: 20, boxShadow: "0 1px 4px rgba(15,23,42,0.06)" }}>
+          <SectionHeader
+            icon={<Activity size={16} color="#2563eb" />}
+            title="Cryptographic Risk Trend"
+            subtitle={
+              <div style={{ display: "flex", gap: 4 }}>
+                {(["1h", "1d", "1w"] as const).map((b) => (
+                  <button key={b} onClick={() => setTimeBucket(b)}
+                    className={`btn btn-sm ${timeBucket === b ? "btn-primary" : "btn-secondary"}`}
+                    style={{ padding: "3px 9px", fontSize: 11 }}>
+                    {b}
+                  </button>
+                ))}
+              </div>
+            }
+          />
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={timeSeriesTrend} margin={{ top: 4, right: 16, left: -24, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="t" stroke="#cbd5e1" fontSize={11} tick={{ fill: "#94a3b8" }} />
+              <YAxis domain={[0, 100]} stroke="#f1f5f9" fontSize={11} tick={{ fill: "#94a3b8" }} />
+              <Tooltip content={<ChartTooltip />} />
+              <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
+              <Line type="monotone" dataKey="risk" name="Avg Risk Score" stroke="#2563eb" strokeWidth={2} dot={{ r: 3, fill: "#2563eb" }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="critical" name="Critical Events" stroke="#dc2626" strokeWidth={2} dot={{ r: 3, fill: "#dc2626" }} activeDot={{ r: 5 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* ── Row 3: TLS Versions + JA3 Fingerprints ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+
+        {/* TLS Versions */}
+        <div style={{ background: "#fff", border: "1px solid #e2e6f0", borderRadius: 12, padding: 20, boxShadow: "0 1px 4px rgba(15,23,42,0.06)" }}>
+          <SectionHeader icon={<Layers size={16} color="#7c3aed" />} title="TLS Version Distribution" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {tlsVersions.map((t) => (
+              <div key={t.version} onClick={() => onFilterSessions({ search: t.version })}
+                style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  padding: "10px 14px", borderRadius: 10, cursor: "pointer",
+                  border: "1px solid #f1f5f9", background: "#fafbfc",
+                  transition: "all 0.15s ease",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9"; (e.currentTarget as HTMLElement).style.borderColor = "#e2e6f0"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fafbfc"; (e.currentTarget as HTMLElement).style.borderColor = "#f1f5f9"; }}
               >
-                <div>
-                  <div className="font-mono" style={{ fontSize: 11, color: "#38bdf8", maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ width: 12, height: 12, borderRadius: 3, background: t.color, flexShrink: 0 }} />
+                <span style={{ fontWeight: 600, color: "#0f172a", fontSize: 13, flex: 1 }}>{t.version}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  {/* Mini progress bar */}
+                  <div style={{ width: 80, height: 6, background: "#f1f5f9", borderRadius: 3, overflow: "hidden" }}>
+                    <div style={{ width: `${t.pct}%`, height: "100%", background: t.color, borderRadius: 3 }} />
+                  </div>
+                  <span style={{ fontWeight: 700, color: "#0f172a", fontSize: 13, fontFamily: "JetBrains Mono, monospace", minWidth: 32, textAlign: "right" }}>{t.count}</span>
+                  <span style={{ fontSize: 11, color: "#94a3b8", minWidth: 32, textAlign: "right" }}>{t.pct}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* JA3 Fingerprints */}
+        <div style={{ background: "#fff", border: "1px solid #e2e6f0", borderRadius: 12, padding: 20, boxShadow: "0 1px 4px rgba(15,23,42,0.06)" }}>
+          <SectionHeader icon={<Activity size={16} color="#0891b2" />} title="Top JA3 Client Fingerprints" subtitle="Click to filter sessions" />
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {ja3Frequencies.length === 0 ? (
+              <div style={{ padding: "24px", textAlign: "center", color: "#94a3b8", fontSize: 13 }}>No JA3 fingerprints in this capture</div>
+            ) : ja3Frequencies.map((j, idx) => (
+              <div key={j.ja3} onClick={() => onFilterSessions({ search: j.ja3 })}
+                style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  padding: "10px 14px", borderRadius: 10, cursor: "pointer",
+                  border: "1px solid #f1f5f9", background: "#fafbfc",
+                  transition: "all 0.15s ease",
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#f1f5f9"; (e.currentTarget as HTMLElement).style.borderColor = "#e2e6f0"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fafbfc"; (e.currentTarget as HTMLElement).style.borderColor = "#f1f5f9"; }}
+              >
+                <div style={{
+                  width: 24, height: 24, borderRadius: 6, background: "#dbeafe",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 11, fontWeight: 700, color: "#2563eb", flexShrink: 0,
+                }}>#{idx + 1}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="font-mono" style={{ fontSize: 11.5, color: "#2563eb", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600 }}>
                     {j.ja3}
                   </div>
-                  <div style={{ fontSize: 10.5, color: "var(--text-muted)", marginTop: 2 }}>
-                    Seen: {new Date(j.first * 1000).toLocaleTimeString()} - {new Date(j.last * 1000).toLocaleTimeString()}
+                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>
+                    {new Date(j.first * 1000).toLocaleTimeString()} – {new Date(j.last * 1000).toLocaleTimeString()}
                   </div>
                 </div>
-                <span className="font-mono" style={{ fontWeight: 700, color: "#f8fafc" }}>{j.count}</span>
+                <div style={{
+                  background: "#dbeafe", borderRadius: 8, padding: "4px 10px",
+                  fontSize: 13, fontWeight: 700, color: "#1d4ed8", fontFamily: "JetBrains Mono, monospace",
+                  flexShrink: 0,
+                }}>{j.count}</div>
               </div>
             ))}
           </div>

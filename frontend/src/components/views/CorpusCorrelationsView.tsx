@@ -224,7 +224,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
               <Network size={20} color="#38bdf8" />
               Behavioral Analysis: Automated Timing & Regular Polling Detection
             </h2>
-            <p style={{ fontSize: 12.5, color: "var(--text-secondary)", marginTop: 4, maxWidth: 900 }}>
+            <p style={{ fontSize: 12.5, color: "#475569", marginTop: 4, maxWidth: 900 }}>
               Evaluates inter-arrival timing regularity (mean interval, standard deviation, CoV, jitter percentage) across repeated sessions between endpoint pairs. Identifies automated beacon candidates without claiming malicious intent.
             </p>
           </div>
@@ -243,7 +243,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
             <div className="font-mono" style={{ fontSize: 22, fontWeight: 800, color: "#ef4444", marginTop: 2 }}>
               {summaryCounts.beaconCandidates}
             </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>Score &ge; 70 (Requires Investigation)</div>
+            <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>Score &ge; 70 (Requires Investigation)</div>
           </div>
 
           <div style={{ background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.25)", borderRadius: 6, padding: "10px 14px" }}>
@@ -251,7 +251,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
             <div className="font-mono" style={{ fontSize: 22, fontWeight: 800, color: "#f59e0b", marginTop: 2 }}>
               {summaryCounts.suspiciousTiming}
             </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>Score 40-69 (Moderate Regularity)</div>
+            <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>Score 40-69 (Moderate Regularity)</div>
           </div>
 
           <div style={{ background: "rgba(100, 116, 139, 0.1)", border: "1px solid rgba(100, 116, 139, 0.25)", borderRadius: 6, padding: "10px 14px" }}>
@@ -259,7 +259,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
             <div className="font-mono" style={{ fontSize: 22, fontWeight: 800, color: "#cbd5e1", marginTop: 2 }}>
               {summaryCounts.insufficientData}
             </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>&lt; 5 Events (No Score Fabricated)</div>
+            <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>&lt; 5 Events (No Score Fabricated)</div>
           </div>
 
           <div style={{ background: "rgba(56, 189, 248, 0.08)", border: "1px solid rgba(56, 189, 248, 0.2)", borderRadius: 6, padding: "10px 14px" }}>
@@ -267,7 +267,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
             <div className="font-mono" style={{ fontSize: 22, fontWeight: 800, color: "#38bdf8", marginTop: 2 }}>
               {summaryCounts.analyzedGroups}
             </div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>Canonical 4-Tuple Flows</div>
+            <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>Canonical 4-Tuple Flows</div>
           </div>
         </div>
       </div>
@@ -281,13 +281,13 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
               <Radio size={16} color="#38bdf8" />
               Timing Interval vs. Jitter (%) Distribution
             </h3>
-            <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Low Jitter (&lt;15%) &bull; High Regularity</span>
+            <span style={{ fontSize: 11, color: "#64748b" }}>Low Jitter (&lt;15%) &bull; High Regularity</span>
           </div>
 
           <div style={{ height: 280, width: "100%" }}>
             <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis
                   type="number"
                   dataKey="x"
@@ -309,7 +309,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
                 <ZAxis type="number" dataKey="z" range={[60, 400]} name="Event Count" />
                 <Tooltip
                   cursor={{ strokeDasharray: "3 3" }}
-                  contentStyle={{ background: "#0f172a", borderColor: "#334155", borderRadius: 6, fontSize: 12 }}
+                  contentStyle={{ background: "#fff", borderColor: "#e2e6f0", borderRadius: 6, fontSize: 12 }}
                   formatter={(val: any, name: any) => [val, String(name)]}
                 />
                 <Scatter
@@ -336,7 +336,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
             <div style={{ background: "rgba(15, 23, 42, 0.6)", border: "1px solid var(--border-subtle)", borderRadius: 6, padding: 14 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, paddingBottom: 8, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <div>
-                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Target Endpoint Pair:</span>
+                  <span style={{ fontSize: 11, color: "#64748b" }}>Target Endpoint Pair:</span>
                   <div className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#38bdf8" }}>{activeGroup.pair}</div>
                 </div>
                 <div>
@@ -358,7 +358,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
               <div style={{ fontSize: 12, fontWeight: 700, color: "#fff", marginBottom: 6 }}>
                 Why was this flagged?
               </div>
-              <ul style={{ margin: "0 0 12px 18px", padding: 0, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6 }}>
+              <ul style={{ margin: "0 0 12px 18px", padding: 0, fontSize: 12, color: "#475569", lineHeight: 1.6 }}>
                 {activeGroup.explanation.length > 0 ? (
                   activeGroup.explanation.map((reason, idx) => (
                     <li key={idx}><strong>•</strong> {reason}</li>
@@ -392,7 +392,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
               </div>
             </div>
           ) : (
-            <div style={{ color: "var(--text-muted)", fontSize: 12, padding: 30, textAlign: "center" }}>
+            <div style={{ color: "#64748b", fontSize: 12, padding: 30, textAlign: "center" }}>
               Select an endpoint pair from the table below to inspect underlying evidence.
             </div>
           )}
@@ -406,14 +406,14 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
             <Activity size={16} color="#38bdf8" />
             Analyzed Communication Groups & Behavioral Regularity ({temporalGroups.length})
           </h3>
-          <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+          <span style={{ fontSize: 11, color: "#64748b" }}>
             Sorted by Regularity Score &bull; Click row to inspect explanation
           </span>
         </div>
 
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid var(--border-subtle)", textAlign: "left", color: "var(--text-muted)", fontSize: 11 }}>
+            <tr style={{ borderBottom: "1px solid var(--border-subtle)", textAlign: "left", color: "#64748b", fontSize: 11 }}>
               <th style={{ padding: "8px 10px" }}>Endpoint Pair</th>
               <th style={{ padding: "8px 10px" }}>Connections</th>
               <th style={{ padding: "8px 10px" }}>Mean Interval</th>
@@ -437,7 +437,7 @@ export const CorpusCorrelationsView: React.FC<CorpusCorrelationsViewProps> = ({
                     background: isSelected ? "rgba(56, 189, 248, 0.08)" : undefined,
                   }}
                 >
-                  <td className="font-mono" style={{ padding: "9px 10px", color: "#f8fafc", fontSize: 11 }}>
+                  <td className="font-mono" style={{ padding: "9px 10px", color: "#0f172a", fontSize: 11 }}>
                     {b.pair}
                   </td>
                   <td className="font-mono" style={{ padding: "9px 10px", color: "#cbd5e1" }}>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield, Activity, HelpCircle, UploadCloud, Terminal, CheckCircle2 } from "lucide-react";
+import { Activity, HelpCircle, UploadCloud, Terminal, CheckCircle2 } from "lucide-react";
 
 interface HeaderProps {
   currentAnalysisId: string;
@@ -28,21 +28,12 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="glass-panel" style={{ margin: "12px 16px 8px 16px", padding: "10px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       {/* Brand */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <div style={{ width: 34, height: 34, borderRadius: 8, background: "linear-gradient(135deg, #0284c7, #38bdf8)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 14px rgba(56, 189, 248, 0.35)" }}>
-          <Shield size={20} color="#fff" />
-        </div>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "16px", fontWeight: 700, letterSpacing: "-0.02em", color: "#fff" }}>PECFF</span>
-            <span style={{ fontSize: "11px", background: "rgba(56, 189, 248, 0.15)", color: "#38bdf8", border: "1px solid rgba(56, 189, 248, 0.3)", padding: "1px 6px", borderRadius: 4, fontWeight: 600 }}>
-              FORENSIC CONSOLE
-            </span>
-          </div>
-          <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
-            Passive Email Cryptographic Forensics &bull; NIST SP 800-57
-          </div>
-        </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <img src="/relic-logo.png" alt="Relic" style={{ width: 32, height: 32, objectFit: "contain" }} />
+        <img src="/relic-wordmark.png" alt="RELIC" style={{ height: 22, width: "auto", objectFit: "contain" }} />
+        <span style={{ fontSize: "11px", background: "rgba(30, 111, 200, 0.1)", color: "#1e6fc8", border: "1px solid rgba(30, 111, 200, 0.25)", padding: "1px 6px", borderRadius: 4, fontWeight: 700 }}>
+          FORENSIC CONSOLE
+        </span>
       </div>
 
       {/* Center Triage Timer & Target */}

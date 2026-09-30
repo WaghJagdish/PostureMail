@@ -28,6 +28,8 @@ MANIFEST
 
 # Virtual Environments
 .venv/
+.venv-mac/
+.venv*/
 env/
 venv/
 ENV/

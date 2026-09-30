@@ -40,9 +40,9 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
 
   if (!session) {
     return (
-      <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)" }}>
+      <div style={{ padding: 40, textAlign: "center", color: "#64748b" }}>
         <Layers size={48} style={{ opacity: 0.3, margin: "0 auto 16px auto" }} />
-        <h3 style={{ fontSize: 16, color: "#f8fafc", marginBottom: 6 }}>No Session Selected</h3>
+        <h3 style={{ fontSize: 16, color: "#0f172a", marginBottom: 6 }}>No Session Selected</h3>
         <p style={{ fontSize: 13 }}>Select a session from the triage table to inspect full cryptographic and STARTTLS provenance.</p>
       </div>
     );
@@ -119,7 +119,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
   return (
     <div style={{ padding: "0 16px 24px 16px", maxWidth: 1400, margin: "0 auto" }}>
       {/* Session Hero Banner */}
-      <div className="card" style={{ padding: 18, marginBottom: 16, background: "rgba(17, 24, 39, 0.9)" }}>
+      <div className="card" style={{ padding: 18, marginBottom: 16, background: "var(--bg-surface)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -146,7 +146,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
                 </span>
               )}
             </div>
-            <div style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 6, display: "flex", gap: 16 }}>
+            <div style={{ fontSize: 13, color: "#475569", marginTop: 6, display: "flex", gap: 16 }}>
               <span><b>Client:</b> {session.client_ip}:{session.client_port}</span>
               <span>&rarr;</span>
               <span><b>Server:</b> {session.server_ip}:{session.server_port} ({session.sni || "No SNI"})</span>
@@ -156,8 +156,8 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
           </div>
 
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Capture First Seen</div>
-            <div className="font-mono" style={{ fontSize: 12, color: "#f8fafc" }}>
+            <div style={{ fontSize: 11, color: "#64748b" }}>Capture First Seen</div>
+            <div className="font-mono" style={{ fontSize: 12, color: "#0f172a" }}>
               {new Date(session.first_seen * 1000).toLocaleString()} ({session.duration_sec}s)
             </div>
           </div>
@@ -219,7 +219,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
                     width: 28,
                     height: 28,
                     borderRadius: "50%",
-                    background: isVetoNode ? "#ef4444" : isSelected ? "#0284c7" : "#1e293b",
+                    background: isVetoNode ? "#ef4444" : isSelected ? "#2563eb" : "#e2e6f0",
                     border: `2px solid ${isSelected ? "#38bdf8" : isVetoNode ? "#f87171" : "#475569"}`,
                     boxShadow: isSelected ? "0 0 10px rgba(56, 189, 248, 0.5)" : "none",
                     display: "flex",
@@ -233,16 +233,16 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
                 <div style={{ fontSize: 11, fontWeight: isSelected ? 700 : 500, color: isSelected ? "#38bdf8" : "#94a3b8", marginTop: 6 }}>
                   {step.state}
                 </div>
-                <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 2 }}>{step.title}</div>
+                <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>{step.title}</div>
               </div>
             );
           })}
         </div>
 
         {/* Selected Node Evidence Hex/ASCII Viewer */}
-        <div style={{ background: "#080c14", border: "1px solid #1e293b", borderRadius: 8, padding: 14 }}>
+        <div style={{ background: "#f8fafc", border: "1px solid var(--border-subtle)", borderRadius: 8, padding: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>
+            <div style={{ fontSize: 12, color: "#475569" }}>
               Stream Offset: <b className="font-mono" style={{ color: "#38bdf8" }}>+{currentStep.offset} bytes</b> &bull; Node: <b style={{ color: "#fff" }}>{currentStep.state} ({currentStep.title})</b>
             </div>
             <button onClick={handleCopyHex} className="btn btn-secondary btn-sm" style={{ padding: "3px 8px", fontSize: 11 }}>
@@ -274,7 +274,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
                 Categorical Policy Veto Floor Triggered
               </div>
               {session.risk_breakdown.vetoes.map((v: any, i: number) => (
-                <div key={i} style={{ fontSize: 12, color: "#f8fafc", marginTop: 4 }}>
+                <div key={i} style={{ fontSize: 12, color: "#0f172a", marginTop: 4 }}>
                   &bull; <b>{v.rule_id}</b>: {v.evidence} (Floor: {v.floor_score} &bull; {v.nist_reference})
                 </div>
               ))}
@@ -290,7 +290,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
                 return (
                   <div key={comp}>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11.5, marginBottom: 3 }}>
-                      <span style={{ textTransform: "capitalize", color: "var(--text-secondary)" }}>
+                      <span style={{ textTransform: "capitalize", color: "#475569" }}>
                         {comp.replace("_", " ")} (Weight: {(Number(weight) * 100).toFixed(1)}%)
                       </span>
                       <span className="font-mono" style={{ fontWeight: 700, color: numScore > 50 ? "#f87171" : "#38bdf8" }}>
@@ -312,7 +312,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
           </div>
 
           {/* Provenance Table */}
-          <h4 style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 6 }}>
+          <h4 style={{ fontSize: 12, fontWeight: 700, color: "#64748b", textTransform: "uppercase", marginBottom: 6 }}>
             Auditable Provenance Items
           </h4>
           <div style={{ maxHeight: 150, overflowY: "auto", border: "1px solid var(--border-subtle)", borderRadius: 6 }}>
@@ -321,9 +321,9 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
                 {session.risk_breakdown?.provenance?.map((p: any, i: number) => (
                   <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}>
                     <td className="font-mono" style={{ padding: "6px 8px", color: "#38bdf8" }}>{p.rule_id}</td>
-                    <td style={{ padding: "6px 8px", color: "#f8fafc" }}>{p.evidence}</td>
+                    <td style={{ padding: "6px 8px", color: "#0f172a" }}>{p.evidence}</td>
                     <td style={{ padding: "6px 8px", color: "#ef4444", fontWeight: 700 }}>+{p.penalty}</td>
-                    <td style={{ padding: "6px 8px", color: "var(--text-muted)" }}>{p.nist_reference}</td>
+                    <td style={{ padding: "6px 8px", color: "#64748b" }}>{p.nist_reference}</td>
                   </tr>
                 ))}
               </tbody>
@@ -339,7 +339,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
           </h3>
 
           {isTls13 ? (
-            <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)" }}>
+            <div style={{ padding: 24, textAlign: "center", color: "#64748b" }}>
               <Lock size={32} style={{ opacity: 0.4, margin: "0 auto 10px auto" }} />
               <div style={{ fontSize: 13, color: "#38bdf8", fontWeight: 600 }}>Certificate not observable</div>
               <div style={{ fontSize: 11.5, marginTop: 4 }}>Encrypted in TLS 1.3 EncryptedExtensions.</div>
@@ -347,12 +347,12 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {/* Leaf Node */}
-              <div style={{ background: "rgba(0,0,0,0.25)", padding: 10, borderRadius: 6, borderLeft: "3px solid #38bdf8" }}>
+              <div style={{ background: "var(--bg-input)", padding: 10, borderRadius: 6, borderLeft: "3px solid #38bdf8" }}>
                 <div style={{ fontSize: 11, color: "#38bdf8", fontWeight: 700 }}>1. LEAF CERTIFICATE</div>
-                <div style={{ fontSize: 12, color: "#f8fafc", fontWeight: 600, marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: "#0f172a", fontWeight: 600, marginTop: 2 }}>
                   CN={session.sni || "mail.enterprise.corp"}
                 </div>
-                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
+                <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
                   RSA 2048-bit &bull; SHA256withRSA &bull; Evaluated at capture time
                 </div>
                 <div style={{ marginTop: 4 }}>
@@ -361,17 +361,17 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
               </div>
 
               {/* Anchor Root Node */}
-              <div style={{ background: "rgba(0,0,0,0.25)", padding: 10, borderRadius: 6, borderLeft: "3px solid #10b981" }}>
+              <div style={{ background: "var(--bg-input)", padding: 10, borderRadius: 6, borderLeft: "3px solid #10b981" }}>
                 <div style={{ fontSize: 11, color: "#10b981", fontWeight: 700, display: "flex", justifyContent: "space-between" }}>
                   <span>2. TRUST ANCHOR ROOT</span>
                   <span className="badge" style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: 9.5 }}>
                     MOZILLA NSS ROOT
                   </span>
                 </div>
-                <div style={{ fontSize: 12, color: "#f8fafc", fontWeight: 600, marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: "#0f172a", fontWeight: 600, marginTop: 2 }}>
                   CN=DigiCert Global Root CA
                 </div>
-                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
+                <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
                   Trust Store SHA-256 Verified &bull; Offline Path Valid
                 </div>
               </div>
@@ -404,16 +404,16 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 12 }}>
-            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Mean Period</div>
+            <div style={{ background: "var(--bg-input)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10, color: "#64748b" }}>Mean Period</div>
               <div className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#38bdf8" }}>
                 {session.temporal_behavior?.mean_interval !== null && session.temporal_behavior?.mean_interval !== undefined
                   ? `${session.temporal_behavior.mean_interval}s`
                   : "N/A"}
               </div>
             </div>
-            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Jitter (%)</div>
+            <div style={{ background: "var(--bg-input)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10, color: "#64748b" }}>Jitter (%)</div>
               <div
                 className="font-mono"
                 style={{
@@ -432,16 +432,16 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
                   : "N/A"}
               </div>
             </div>
-            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>CoV</div>
+            <div style={{ background: "var(--bg-input)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10, color: "#64748b" }}>CoV</div>
               <div className="font-mono" style={{ fontSize: 13, fontWeight: 700, color: "#10b981" }}>
                 {session.temporal_behavior?.cv !== null && session.temporal_behavior?.cv !== undefined
                   ? session.temporal_behavior.cv
                   : "N/A"}
               </div>
             </div>
-            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Score</div>
+            <div style={{ background: "var(--bg-input)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10, color: "#64748b" }}>Score</div>
               <div
                 className="font-mono"
                 style={{
@@ -473,34 +473,34 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 14 }}>
-            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
-              <div style={{ fontSize: 10.5, color: "var(--text-muted)" }}>Anomaly Score</div>
+            <div style={{ background: "var(--bg-input)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10.5, color: "#64748b" }}>Anomaly Score</div>
               <div className="font-mono" style={{ fontSize: 15, fontWeight: 700, color: session.is_anomaly ? "#f87171" : "#10b981" }}>
                 {session.ml_result?.anomaly_score?.toFixed(3) || "0.124"}
               </div>
             </div>
-            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
-              <div style={{ fontSize: 10.5, color: "var(--text-muted)" }}>Percentile</div>
+            <div style={{ background: "var(--bg-input)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10.5, color: "#64748b" }}>Percentile</div>
               <div className="font-mono" style={{ fontSize: 15, fontWeight: 700, color: "#38bdf8" }}>
                 {session.ml_result?.anomaly_percentile ? `${session.ml_result.anomaly_percentile}%` : "12.4%"}
               </div>
             </div>
-            <div style={{ background: "rgba(0,0,0,0.25)", padding: 8, borderRadius: 6 }}>
-              <div style={{ fontSize: 10.5, color: "var(--text-muted)" }}>Model Status</div>
+            <div style={{ background: "var(--bg-input)", padding: 8, borderRadius: 6 }}>
+              <div style={{ fontSize: 10.5, color: "#64748b" }}>Model Status</div>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#a855f7" }}>Experimental</div>
             </div>
           </div>
 
-          <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 6 }}>
+          <div style={{ fontSize: 11.5, fontWeight: 600, color: "#475569", marginBottom: 6 }}>
             Top SHAP Feature Contributions:
           </div>
           <div style={{ height: 110 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={shapData} layout="vertical" margin={{ left: 20, right: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis type="number" stroke="#64748b" fontSize={10} />
                 <YAxis dataKey="feature" type="category" stroke="#94a3b8" fontSize={10} width={110} />
-                <Tooltip contentStyle={{ background: "#0f172a", borderColor: "#334155", borderRadius: 6, fontSize: 11 }} />
+                <Tooltip contentStyle={{ background: "#fff", borderColor: "#e2e6f0", borderRadius: 6, fontSize: 11 }} />
                 <Bar dataKey="contribution" fill="#a855f7" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -553,7 +553,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
                 <CheckCircle2 size={14} /> Verdict saved to audit database
               </span>
             ) : (
-              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Shortcuts: <kbd className="font-mono">v</kbd></span>
+              <span style={{ fontSize: 11, color: "#64748b" }}>Shortcuts: <kbd className="font-mono">v</kbd></span>
             )}
 
             <button
@@ -573,7 +573,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
       <div className="card" style={{ padding: 14 }}>
         <button
           onClick={() => setRawJsonOpen(!rawJsonOpen)}
-          style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", color: "#f8fafc", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
+          style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", background: "none", border: "none", color: "#0f172a", cursor: "pointer", fontSize: 13, fontWeight: 600 }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Eye size={15} color="#64748b" />
@@ -583,7 +583,7 @@ export const SessionDetailView: React.FC<SessionDetailViewProps> = ({
         </button>
 
         {rawJsonOpen && (
-          <pre className="font-mono" style={{ marginTop: 12, padding: 12, background: "#080c14", borderRadius: 6, fontSize: 11, color: "#94a3b8", maxHeight: 300, overflowY: "auto" }}>
+          <pre className="font-mono" style={{ marginTop: 12, padding: 12, background: "#f8fafc", borderRadius: 6, fontSize: 11, color: "#94a3b8", maxHeight: 300, overflowY: "auto" }}>
             {JSON.stringify(session, null, 2)}
           </pre>
         )}

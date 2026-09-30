@@ -1,12 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  Search,
-  Download,
-  CheckSquare,
-  Square,
-  ChevronRight,
-} from "lucide-react";
+import { Search, Download, CheckSquare, Square, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { SessionDetailSchema } from "../../api/client";
 
 interface SessionTableViewProps {
@@ -19,14 +13,33 @@ interface SessionTableViewProps {
 }
 
 const PRESETS = [
-  { id: "all", label: "All Sessions" },
-  { id: "beacon_candidates", label: "Beacon Candidates", beacon: true },
-  { id: "critical", label: "Critical Risk (≥80)", band: "CRITICAL" },
-  { id: "stripping", label: "STARTTLS Stripped", state: "S_STRIP_DETECTED" },
-  { id: "anomalies", label: "Anomalous Flows (ML)", anomaly: true },
-  { id: "weak_kex", label: "Weak / Static RSA", cipher: "RSA" },
-  { id: "tls13", label: "TLS 1.3 Only", tls13: true },
+  { id: "all", label: "All" },
+  { id: "critical", label: "Critical Risk" },
+  { id: "stripping", label: "STARTTLS Stripped" },
+  { id: "anomalies", label: "ML Anomalies" },
+  { id: "beacon_candidates", label: "Beacon Candidates" },
+  { id: "weak_kex", label: "Weak KEX" },
 ];
+
+const RISK_COLOR: Record<string, string> = {
+  CRITICAL: "#dc2626", HIGH: "#ea580c", WEAK: "#d97706", ACCEPTABLE: "#059669", SECURE: "#0891b2",
+};
+const RISK_BG: Record<string, string> = {
+  CRITICAL: "#fef2f2", HIGH: "#fff7ed", WEAK: "#fffbeb", ACCEPTABLE: "#ecfdf5", SECURE: "#ecfeff",
+};
+
+const RiskBadge: React.FC<{ band: string; score: number }> = ({ band, score }) => (
+  <span className="font-mono tabular-nums" style={{
+    display: "inline-flex", alignItems: "center", gap: 5,
+    padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 700,
+    background: RISK_BG[band] || "#f8fafc",
+    color: RISK_COLOR[band] || "#475569",
+    border: `1px solid ${RISK_COLOR[band] || "#e2e6f0"}33`,
+  }}>
+    <span>{score.toFixed(0)}</span>
+    <span className="font-display" style={{ opacity: 0.8, fontSize: 9.5, fontWeight: 800, letterSpacing: "0.04em" }}>{band}</span>
+  </span>
+);
 
 export const SessionTableView: React.FC<SessionTableViewProps> = ({
   sessions,
@@ -44,323 +57,239 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // Sync external search updates from chart clicks
-  useEffect(() => {
-    if (externalSearch) setSearch(externalSearch);
-  }, [externalSearch]);
+  useEffect(() => { if (externalSearch) setSearch(externalSearch); }, [externalSearch]);
 
-  // Filter sessions
+  // Filter
   const filteredSessions = useMemo(() => {
     return sessions.filter((s) => {
-      // 1. Preset filter
       if (selectedPreset === "beacon_candidates" && s.temporal_classification !== "BEACON_CANDIDATE") return false;
       if (selectedPreset === "critical" && s.risk_band !== "CRITICAL") return false;
       if (selectedPreset === "stripping" && s.starttls_state !== "S_STRIP_DETECTED") return false;
       if (selectedPreset === "anomalies" && !s.is_anomaly) return false;
       if (selectedPreset === "weak_kex" && !s.risk_breakdown?.component_scores?.key_exchange) return false;
-      if (selectedPreset === "tls13" && !s.risk_breakdown?.weight_redistributed) return false;
-
-      // 2. Text Search
       if (search.trim()) {
         const q = search.toLowerCase();
-        const matches =
-          s.id.toLowerCase().includes(q) ||
-          s.client_ip.toLowerCase().includes(q) ||
-          s.server_ip.toLowerCase().includes(q) ||
-          (s.sni && s.sni.toLowerCase().includes(q)) ||
-          s.protocol.toLowerCase().includes(q) ||
-          s.risk_band.toLowerCase().includes(q) ||
-          (s.ja3 && s.ja3.toLowerCase().includes(q)) ||
-          (s.ja4 && s.ja4.toLowerCase().includes(q)) ||
-          s.starttls_state.toLowerCase().includes(q);
-        if (!matches) return false;
+        return (
+          s.id.toLowerCase().includes(q) || s.client_ip.toLowerCase().includes(q) ||
+          s.server_ip.toLowerCase().includes(q) || (s.sni && s.sni.toLowerCase().includes(q)) ||
+          s.protocol.toLowerCase().includes(q) || s.risk_band.toLowerCase().includes(q) ||
+          (s.ja3 && s.ja3.toLowerCase().includes(q)) || s.starttls_state.toLowerCase().includes(q)
+        );
       }
-
       return true;
     });
   }, [sessions, selectedPreset, search]);
 
-  // Virtualizer for 60fps high performance at 10,000 rows
   const rowVirtualizer = useVirtualizer({
     count: filteredSessions.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 40,
+    estimateSize: () => 44,
     overscan: 20,
   });
 
-  // Keyboard navigation (j/k, Enter, v, /)
+  // Keyboard nav
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        if (e.key === "Escape") {
-          (e.target as HTMLElement).blur();
-        }
+        if (e.key === "Escape") (e.target as HTMLElement).blur();
         return;
       }
-
-      if (e.key === "j" || e.key === "ArrowDown") {
-        e.preventDefault();
-        setFocusedIndex((prev) => Math.min(filteredSessions.length - 1, prev + 1));
-      } else if (e.key === "k" || e.key === "ArrowUp") {
-        e.preventDefault();
-        setFocusedIndex((prev) => Math.max(0, prev - 1));
-      } else if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        if (filteredSessions[focusedIndex]) {
-          onSelectSession(filteredSessions[focusedIndex]);
-        }
-      } else if (e.key === "/") {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      } else if (e.key === "v") {
-        e.preventDefault();
-        if (filteredSessions[focusedIndex]) {
-          onOpenVerdict(filteredSessions[focusedIndex].id);
-        }
-      }
+      if (e.key === "j" || e.key === "ArrowDown") { e.preventDefault(); setFocusedIndex((p) => Math.min(filteredSessions.length - 1, p + 1)); }
+      else if (e.key === "k" || e.key === "ArrowUp") { e.preventDefault(); setFocusedIndex((p) => Math.max(0, p - 1)); }
+      else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); if (filteredSessions[focusedIndex]) onSelectSession(filteredSessions[focusedIndex]); }
+      else if (e.key === "/") { e.preventDefault(); searchInputRef.current?.focus(); }
+      else if (e.key === "v") { e.preventDefault(); if (filteredSessions[focusedIndex]) onOpenVerdict(filteredSessions[focusedIndex].id); }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [filteredSessions, focusedIndex, onSelectSession, onOpenVerdict]);
 
-  // Bulk Selection Handlers
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredSessions.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filteredSessions.map((s) => s.id)));
-    }
+    setSelectedIds(selectedIds.size === filteredSessions.length ? new Set() : new Set(filteredSessions.map((s) => s.id)));
   };
-
   const toggleSelectOne = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     const next = new Set(selectedIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
+    next.has(id) ? next.delete(id) : next.add(id);
     setSelectedIds(next);
   };
 
   const exportSelectedAsJSON = () => {
-    const targetSessions = selectedIds.size > 0 ? sessions.filter((s) => selectedIds.has(s.id)) : filteredSessions;
-    const blob = new Blob([JSON.stringify(targetSessions, null, 2)], { type: "application/json" });
+    const targets = selectedIds.size > 0 ? sessions.filter((s) => selectedIds.has(s.id)) : filteredSessions;
+    const blob = new Blob([JSON.stringify(targets, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url;
-    a.download = `pecff_sessions_export_${Date.now()}.json`;
-    a.click();
+    a.href = url; a.download = `pecff_sessions_${Date.now()}.json`; a.click();
     URL.revokeObjectURL(url);
   };
 
+  const COLS = "32px 110px 155px 155px 75px 95px 115px 90px 70px 38px";
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 135px)", margin: "0 16px" }}>
-      {/* Top Filter & Action Bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 12 }}>
-        {/* Presets */}
-        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 120px)" }}>
+
+      {/* ── Toolbar ── */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10, marginBottom: 12,
+        justifyContent: "space-between", flexWrap: "wrap",
+      }}>
+        {/* Preset tabs */}
+        <div style={{
+          display: "flex", gap: 4, background: "#fff",
+          border: "1px solid #e2e6f0", borderRadius: 10, padding: 4,
+          boxShadow: "0 1px 4px rgba(15,23,42,0.05)",
+        }}>
           {PRESETS.map((p) => {
-            const isSelected = selectedPreset === p.id;
+            const active = selectedPreset === p.id;
             return (
-              <button
-                key={p.id}
-                onClick={() => setSelectedPreset(p.id)}
-                style={{
-                  padding: "5px 11px",
-                  borderRadius: 6,
-                  fontSize: 12,
-                  fontWeight: isSelected ? 600 : 500,
-                  background: isSelected ? "rgba(56, 189, 248, 0.15)" : "rgba(30, 41, 59, 0.5)",
-                  color: isSelected ? "#38bdf8" : "var(--text-secondary)",
-                  border: `1px solid ${isSelected ? "rgba(56, 189, 248, 0.4)" : "var(--border-subtle)"}`,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  transition: "all 0.15s ease",
-                }}
-              >
+              <button key={p.id} onClick={() => setSelectedPreset(p.id)} style={{
+                padding: "5px 13px", borderRadius: 7, border: "none", cursor: "pointer",
+                fontSize: 12, fontWeight: active ? 600 : 500, whiteSpace: "nowrap",
+                background: active ? "#2563eb" : "transparent",
+                color: active ? "#fff" : "#64748b",
+                transition: "all 0.15s ease",
+              }}>
                 {p.label}
               </button>
             );
           })}
         </div>
 
-        {/* Search & Actions */}
+        {/* Search + actions */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ position: "relative" }}>
-            <Search size={14} color="#64748b" style={{ position: "absolute", left: 9, top: 8 }} />
+            <Search size={13} color="#94a3b8" style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
             <input
-              ref={searchInputRef}
-              type="search"
-              placeholder="Filter sessions [/]..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              style={{ paddingLeft: 28, width: 220, fontSize: 12 }}
+              ref={searchInputRef} type="search"
+              placeholder="Filter sessions [/]…"
+              value={search} onChange={(e) => setSearch(e.target.value)}
+              style={{ paddingLeft: 30, width: 220, fontSize: 13 }}
             />
           </div>
-
           <button onClick={exportSelectedAsJSON} className="btn btn-secondary btn-sm" style={{ gap: 5 }}>
             <Download size={13} />
-            <span>Export ({selectedIds.size || filteredSessions.length})</span>
+            Export ({selectedIds.size || filteredSessions.length})
           </button>
         </div>
       </div>
 
-      {/* Table Container with Virtualization */}
-      <div
-        className="card"
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          background: "rgba(17, 24, 39, 0.8)",
-          backdropFilter: "blur(10px)",
-        }}
-      >
+      {/* ── Table Card ── */}
+      <div style={{
+        flex: 1, display: "flex", flexDirection: "column",
+        background: "#fff", border: "1px solid #e2e6f0", borderRadius: 12,
+        boxShadow: "0 1px 4px rgba(15,23,42,0.06)", overflow: "hidden",
+      }}>
         {/* Table Header */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "36px 130px 160px 160px 80px 100px 90px 120px 80px 70px 40px",
-            background: "rgba(10, 14, 23, 0.8)",
-            borderBottom: "1px solid var(--border-subtle)",
-            padding: "8px 12px",
-            fontSize: 11,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            color: "var(--text-muted)",
-            letterSpacing: "0.04em",
-            userSelect: "none",
-          }}
-        >
+        <div className="font-display" style={{
+          display: "grid", gridTemplateColumns: COLS,
+          background: "#f8fafc", borderBottom: "2px solid #e2e6f0",
+          padding: "0 14px", height: 40, alignItems: "center",
+          fontSize: 11, fontWeight: 700, textTransform: "uppercase",
+          color: "#64748b", letterSpacing: "0.06em", userSelect: "none",
+          flexShrink: 0,
+        }}>
           <div onClick={toggleSelectAll} style={{ cursor: "pointer", display: "flex", alignItems: "center" }}>
-            {selectedIds.size === filteredSessions.length && filteredSessions.length > 0 ? (
-              <CheckSquare size={14} color="#38bdf8" />
-            ) : (
-              <Square size={14} color="#64748b" />
-            )}
+            {selectedIds.size === filteredSessions.length && filteredSessions.length > 0
+              ? <CheckSquare size={14} color="#2563eb" />
+              : <Square size={14} color="#94a3b8" />}
           </div>
-          <div>Session ID</div>
-          <div>Client Endpoint</div>
+          <div>Session</div>
+          <div>Client</div>
           <div>Server / SNI</div>
-          <div>Proto / Mode</div>
-          <div>STARTTLS State</div>
+          <div>Protocol</div>
+          <div>STARTTLS</div>
           <div>Risk Score</div>
-          <div>Temporal Timing</div>
-          <div>ML (Exp)</div>
+          <div>Timing</div>
           <div>Bytes</div>
-          <div style={{ textAlign: "right" }}>View</div>
+          <div />
         </div>
 
-        {/* Virtualized Rows */}
+        {/* Virtualized rows */}
         <div ref={parentRef} style={{ flex: 1, overflowY: "auto", position: "relative" }}>
           <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: "100%", position: "relative" }}>
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const session = filteredSessions[virtualRow.index];
-              const isSelected = selectedSessionId === session.id;
-              const isChecked = selectedIds.has(session.id);
+              const s = filteredSessions[virtualRow.index];
+              const isSelected = selectedSessionId === s.id;
               const isFocused = focusedIndex === virtualRow.index;
+              const isChecked = selectedIds.has(s.id);
+
 
               return (
                 <div
-                  key={session.id}
-                  onClick={() => {
-                    setFocusedIndex(virtualRow.index);
-                    onSelectSession(session);
-                  }}
+                  key={s.id}
+                  onClick={() => { setFocusedIndex(virtualRow.index); onSelectSession(s); }}
                   style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: `${virtualRow.size}px`,
-                    transform: `translateY(${virtualRow.start}px)`,
-                    display: "grid",
-                    gridTemplateColumns: "36px 130px 160px 160px 80px 100px 90px 120px 80px 70px 40px",
-                    alignItems: "center",
-                    padding: "0 12px",
-                    fontSize: 12,
-                    borderBottom: "1px solid rgba(255, 255, 255, 0.03)",
+                    position: "absolute", top: 0, left: 0, width: "100%",
+                    height: `${virtualRow.size}px`, transform: `translateY(${virtualRow.start}px)`,
+                    display: "grid", gridTemplateColumns: COLS,
+                    alignItems: "center", padding: "0 14px",
+                    fontSize: 12.5, cursor: "pointer",
+                    borderBottom: "1px solid #f1f5f9",
+                    borderLeft: isSelected ? `3px solid #2563eb` : "3px solid transparent",
                     background: isSelected
-                      ? "rgba(56, 189, 248, 0.12)"
+                      ? "#eff6ff"
                       : isFocused
-                      ? "rgba(255, 255, 255, 0.04)"
-                      : virtualRow.index % 2 === 0
-                      ? "rgba(0, 0, 0, 0.15)"
-                      : "transparent",
-                    cursor: "pointer",
+                      ? "#f8fafc"
+                      : virtualRow.index % 2 === 0 ? "#fff" : "#fafbfc",
                     transition: "background 0.1s ease",
                   }}
+                  onMouseEnter={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = "#f1f5f9"; }}
+                  onMouseLeave={e => { if (!isSelected) (e.currentTarget as HTMLElement).style.background = virtualRow.index % 2 === 0 ? "#fff" : "#fafbfc"; }}
                 >
-                  <div onClick={(e) => toggleSelectOne(session.id, e)}>
-                    {isChecked ? <CheckSquare size={14} color="#38bdf8" /> : <Square size={14} color="#475569" />}
+                  <div onClick={(e) => toggleSelectOne(s.id, e)}>
+                    {isChecked ? <CheckSquare size={13} color="#2563eb" /> : <Square size={13} color="#cbd5e1" />}
                   </div>
 
-                  <div className="font-mono" style={{ fontSize: 11, color: isSelected ? "#38bdf8" : "#94a3b8" }}>
-                    {session.id}
+                  <div className="font-mono tabular-nums" style={{ fontSize: 10.5, color: isSelected ? "#2563eb" : "#7b93ab", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {s.id.split("-")[0]}…
                   </div>
 
-                  <div className="font-mono" style={{ fontSize: 11.5, color: "#f8fafc" }}>
-                    {session.client_ip}:{session.client_port}
+                  <div className="font-mono tabular-nums" style={{ fontSize: 11.5, color: "#1a2d45", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {s.client_ip}:{s.client_port}
                   </div>
 
-                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    <span style={{ color: "#f8fafc", fontWeight: 500 }}>
-                      {session.sni || `${session.server_ip}:${session.server_port}`}
-                    </span>
+                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: 12.5, fontWeight: 600, color: "#0d1b2e" }}>
+                    {s.sni || `${s.server_ip}:${s.server_port}`}
                   </div>
 
                   <div>
-                    <span className="badge" style={{ background: "#1e293b", color: "#38bdf8", padding: "1px 5px", fontSize: 10 }}>
-                      {session.protocol}
-                    </span>
+                    <span className="font-display" style={{
+                      display: "inline-block", padding: "2px 7px", borderRadius: 5,
+                      fontSize: 10.5, fontWeight: 800, background: "#dbeafe",
+                      color: "#1d4ed8", letterSpacing: "0.04em",
+                    }}>{s.protocol}</span>
                   </div>
 
-                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {session.starttls_state === "S_STRIP_DETECTED" ? (
-                      <span className="badge badge-CRITICAL" style={{ padding: "1px 5px", fontSize: 10 }}>STRIP DETECTED</span>
-                    ) : session.starttls_state === "S4_ENCRYPTED" ? (
-                      <span style={{ color: "#10b981", fontSize: 11, fontWeight: 500 }}>Encrypted (S4)</span>
+                  <div>
+                    {s.starttls_state === "S_STRIP_DETECTED" ? (
+                      <span className="font-display" style={{ fontSize: 10.5, fontWeight: 800, color: "#dc2626", background: "#fef2f2", border: "1px solid #fecaca", padding: "2px 7px", borderRadius: 5, letterSpacing: "0.04em" }}>STRIPPED</span>
+                    ) : s.starttls_state === "S4_ENCRYPTED" ? (
+                      <span className="font-display" style={{ fontSize: 11, fontWeight: 700, color: "#059669" }}>● Encrypted</span>
                     ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{session.starttls_state}</span>
+                      <span className="font-sans" style={{ fontSize: 11, color: "#94a3b8" }}>{s.starttls_state.replace(/_/g, " ")}</span>
                     )}
                   </div>
 
                   <div>
-                    <span className={`badge badge-${session.risk_band}`} style={{ fontSize: 11, padding: "2px 7px" }}>
-                      {session.risk_score.toFixed(0)} &bull; {session.risk_band}
-                    </span>
+                    <RiskBadge band={s.risk_band} score={s.risk_score} />
                   </div>
 
                   <div>
-                    {session.temporal_classification === "BEACON_CANDIDATE" ? (
-                      <span className="badge badge-CRITICAL" style={{ fontSize: 9.5, padding: "1px 5px", background: "rgba(239, 68, 68, 0.2)", border: "1px solid #ef4444", color: "#fca5a5" }}>
-                        BEACON
-                      </span>
-                    ) : session.temporal_classification === "SUSPICIOUS_TIMING" ? (
-                      <span className="badge badge-HIGH" style={{ fontSize: 9.5, padding: "1px 5px", background: "rgba(245, 158, 11, 0.2)", border: "1px solid #f59e0b", color: "#fcd34d" }}>
-                        SUSPICIOUS
-                      </span>
+                    {s.temporal_classification === "BEACON_CANDIDATE" ? (
+                      <span className="font-display" style={{ fontSize: 10, fontWeight: 800, color: "#dc2626", background: "#fef2f2", border: "1px solid #fecaca", padding: "2px 6px", borderRadius: 5, letterSpacing: "0.04em" }}>BEACON</span>
+                    ) : s.temporal_classification === "SUSPICIOUS_TIMING" ? (
+                      <span className="font-display" style={{ fontSize: 10, fontWeight: 800, color: "#d97706", background: "#fffbeb", padding: "2px 6px", borderRadius: 5, letterSpacing: "0.04em" }}>SUSPICIOUS</span>
                     ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 10.5 }}>Normal</span>
+                      <span className="font-sans" style={{ fontSize: 11, color: "#cbd5e1" }}>Normal</span>
                     )}
                   </div>
 
-                  <div>
-                    {session.is_anomaly ? (
-                      <span className="badge badge-WEAK" style={{ fontSize: 9.5, padding: "1px 5px", background: "rgba(168, 85, 247, 0.2)", color: "#d8b4fe" }}>
-                        Exp Outlier
-                      </span>
-                    ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 10.5 }}>Inlier</span>
-                    )}
+                  <div className="font-mono tabular-nums" style={{ fontSize: 11.5, color: "#64748b" }}>
+                    {(((s.c2s_bytes || 0) + (s.s2c_bytes || 0)) / 1024).toFixed(1)} KB
                   </div>
 
-                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                    {(((session.c2s_bytes || 0) + (session.s2c_bytes || 0)) / 1024).toFixed(1)} KB
-                  </div>
-
-                  <div style={{ textAlign: "right" }}>
-                    <ChevronRight size={14} color={isSelected ? "#38bdf8" : "#64748b"} />
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <ChevronRight size={14} color={isSelected ? "#2563eb" : "#cbd5e1"} />
                   </div>
                 </div>
               );
@@ -369,12 +298,19 @@ export const SessionTableView: React.FC<SessionTableViewProps> = ({
         </div>
 
         {/* Footer status bar */}
-        <div style={{ padding: "6px 14px", borderTop: "1px solid var(--border-subtle)", background: "#0a0e17", display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-muted)" }}>
+        <div style={{
+          padding: "7px 16px", borderTop: "1px solid #f1f5f9",
+          background: "#f8fafc", display: "flex", justifyContent: "space-between",
+          fontSize: 11.5, color: "#64748b", flexShrink: 0,
+        }}>
           <div>
-            Showing <b>{filteredSessions.length.toLocaleString()}</b> of {sessions.length.toLocaleString()} flows &bull; Keyboard: <kbd className="font-mono">j/k</kbd> navigate &bull; <kbd className="font-mono">Enter</kbd> inspect &bull; <kbd className="font-mono">v</kbd> verdict
+            Showing <strong style={{ color: "#0f172a" }}>{filteredSessions.length.toLocaleString()}</strong> of {sessions.length.toLocaleString()} sessions
+            &nbsp;·&nbsp;<kbd style={{ background: "#e2e6f0", border: "1px solid #cbd5e1", borderRadius: 4, padding: "1px 5px", fontSize: 10.5, fontFamily: "JetBrains Mono, monospace", color: "#475569" }}>j/k</kbd> navigate
+            &nbsp;·&nbsp;<kbd style={{ background: "#e2e6f0", border: "1px solid #cbd5e1", borderRadius: 4, padding: "1px 5px", fontSize: 10.5, fontFamily: "JetBrains Mono, monospace", color: "#475569" }}>Enter</kbd> inspect
           </div>
-          <div>
-            Sub-200ms virtualized rendering (TanStack Virtual)
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <SlidersHorizontal size={11} />
+            TanStack Virtual · sub-200ms rendering
           </div>
         </div>
       </div>

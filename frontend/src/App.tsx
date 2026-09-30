@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { Header } from "./components/layout/Header";
-import { Tabs, ViewTab } from "./components/layout/Tabs";
-import { UploadQueueView } from "./components/views/UploadQueueView";
+import { AppNav, AppPage } from "./components/layout/AppNav";
+import { LandingPage } from "./components/views/LandingPage";
+import { IngestionPage } from "./components/views/IngestionPage";
 import { AnalysisOverviewView } from "./components/views/AnalysisOverviewView";
 import { SessionTableView } from "./components/views/SessionTableView";
 import { SessionDetailView } from "./components/views/SessionDetailView";
@@ -13,183 +13,165 @@ import {
   generateMockAnalysis,
   AnalysisDetailResponse,
   SessionDetailSchema,
-  FindingSchema,
 } from "./api/client";
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      staleTime: 30000,
-    },
-  },
+  defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 30000 } },
 });
 
-function AnalystConsole() {
-  const [activeTab, setActiveTab] = useState<ViewTab>("overview");
+const DASHBOARD_PAGES: AppPage[] = ["overview", "sessions", "detail", "correlations"];
+
+function AppShell() {
+  const [currentPage, setCurrentPage] = useState<AppPage>("landing");
   const [currentAnalysisId, setCurrentAnalysisId] = useState("analysis-1000-fixtures");
   const [selectedSession, setSelectedSession] = useState<SessionDetailSchema | null>(null);
   const [isMockMode, setIsMockMode] = useState(true);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const [triageTimer, setTriageTimer] = useState(0);
-
-  // Table filter overrides from charts
   const [tableFilterSearch, setTableFilterSearch] = useState("");
   const [tableFilterPreset, setTableFilterPreset] = useState("all");
 
-  // Triage timer ticker
+  // Triage timer — only runs while in dashboard
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTriageTimer((prev) => prev + 1);
-    }, 1000);
+    if (!DASHBOARD_PAGES.includes(currentPage)) return;
+    const timer = setInterval(() => setTriageTimer((prev) => prev + 1), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [currentPage]);
 
-  // Global Keyboard Shortcuts
+  // Keyboard shortcuts
   useEffect(() => {
-    const handleGlobalKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-
-      if (e.key === "1") setActiveTab("upload");
-      else if (e.key === "2") setActiveTab("overview");
-      else if (e.key === "3") setActiveTab("sessions");
-      else if (e.key === "4") setActiveTab("detail");
-      else if (e.key === "5") setActiveTab("correlations");
-      else if (e.key === "?") setIsShortcutsOpen((prev) => !prev);
-      else if (e.key === "Escape") {
-        setIsShortcutsOpen(false);
-      }
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "1") setCurrentPage("ingestion");
+      else if (e.key === "2") setCurrentPage("overview");
+      else if (e.key === "3") setCurrentPage("sessions");
+      else if (e.key === "4") setCurrentPage("detail");
+      else if (e.key === "5") setCurrentPage("correlations");
+      else if (e.key === "?") setIsShortcutsOpen((p) => !p);
+      else if (e.key === "Escape") setIsShortcutsOpen(false);
     };
-
-    window.addEventListener("keydown", handleGlobalKey);
-    return () => window.removeEventListener("keydown", handleGlobalKey);
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
-  // Query Analysis Data
+  // Fetch analysis data
   const { data: analysisData } = useQuery<AnalysisDetailResponse>({
     queryKey: ["analysis", currentAnalysisId, isMockMode],
     queryFn: async () => {
-      if (isMockMode) {
-        return generateMockAnalysis(currentAnalysisId);
-      }
+      if (isMockMode) return generateMockAnalysis(currentAnalysisId);
       return fetchAnalysis(currentAnalysisId);
     },
-    // Only seed with mock data when in mock mode; live mode fetches fresh from backend
     initialData: isMockMode ? () => generateMockAnalysis(currentAnalysisId) : undefined,
   });
 
-  // Automatically select first critical session on initial load for instant inspection
+  // Auto-select first critical session
   useEffect(() => {
     if (analysisData && analysisData.sessions.length > 0 && !selectedSession) {
-      const firstCritical =
+      const first =
         analysisData.sessions.find((s: SessionDetailSchema) => s.risk_band === "CRITICAL") ||
         analysisData.sessions[0];
-      setSelectedSession(firstCritical);
+      setSelectedSession(first);
     }
   }, [analysisData, selectedSession]);
 
-  const handleFilterFromChart = (filter: {
-    risk_band?: string;
-    protocol?: string;
-    cipher?: string;
-    search?: string;
-  }) => {
-    if (filter.risk_band === "CRITICAL") {
-      setTableFilterPreset("critical");
-    } else {
-      setTableFilterPreset("all");
-    }
-
-    if (filter.search) {
-      setTableFilterSearch(filter.search);
-    } else if (filter.risk_band && filter.risk_band !== "CRITICAL") {
-      setTableFilterSearch(filter.risk_band);
-    }
-
-    setActiveTab("sessions");
+  const handleAnalysisReady = (id: string) => {
+    setIsMockMode(false);
+    setCurrentAnalysisId(id);
+    setSelectedSession(null);
+    setCurrentPage("overview");
   };
 
-  const handleSelectSessionFromTable = (s: SessionDetailSchema) => {
-    setSelectedSession(s);
-    setActiveTab("detail");
+  const handleLoadDemo = () => {
+    setIsMockMode(true);
+    setCurrentAnalysisId("analysis-1000-fixtures");
+    setSelectedSession(null);
+    setCurrentPage("overview");
   };
 
-  const handleOpenVerdictFromTable = (sessionId: string) => {
-    const target = analysisData?.sessions.find((s: SessionDetailSchema) => s.id === sessionId);
-    if (target) {
-      setSelectedSession(target);
-      setActiveTab("detail");
-    }
+  const handleFilterFromChart = (filter: { risk_band?: string; protocol?: string; cipher?: string; search?: string }) => {
+    setTableFilterPreset(filter.risk_band === "CRITICAL" ? "critical" : "all");
+    if (filter.search) setTableFilterSearch(filter.search);
+    else if (filter.risk_band && filter.risk_band !== "CRITICAL") setTableFilterSearch(filter.risk_band);
+    setCurrentPage("sessions");
   };
 
-  const criticalCount =
-    analysisData?.findings.filter((f: FindingSchema) => f.severity === "CRITICAL").length || 0;
+
+
+  // Landing page — full-screen, no nav
+  if (currentPage === "landing") {
+    return (
+      <LandingPage
+        onEnterConsole={handleLoadDemo}
+        onGoToIngestion={() => setCurrentPage("ingestion")}
+      />
+    );
+  }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <Header
-        currentAnalysisId={analysisData?.pcap_filename || currentAnalysisId}
-        onNewUpload={() => setActiveTab("upload")}
-        onOpenShortcuts={() => setIsShortcutsOpen(true)}
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "#f5f6fa" }}>
+      <AppNav
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        analysisFilename={analysisData?.pcap_filename || currentAnalysisId}
         isMockMode={isMockMode}
-        onToggleMockMode={() => setIsMockMode(!isMockMode)}
-        activeTab={activeTab}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
         triageTimerSeconds={triageTimer}
       />
 
-      <Tabs
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        selectedSessionId={selectedSession?.id || null}
-        totalSessionsCount={analysisData?.total_sessions || 0}
-        criticalFindingsCount={criticalCount}
-      />
-
       <main style={{ flex: 1 }}>
-        {activeTab === "upload" && (
-          <UploadQueueView
-            onAnalysisReady={(id) => {
-              setCurrentAnalysisId(id);
-              setActiveTab("overview");
-            }}
-            isMockMode={isMockMode}
+        {/* INGESTION */}
+        {currentPage === "ingestion" && (
+          <IngestionPage
+            onAnalysisReady={handleAnalysisReady}
+            onLoadDemo={handleLoadDemo}
           />
         )}
 
-        {activeTab === "overview" && analysisData && (
-          <AnalysisOverviewView
-            analysis={analysisData}
-            onFilterSessions={handleFilterFromChart}
-          />
+        {/* OVERVIEW DASHBOARD */}
+        {currentPage === "overview" && analysisData && (
+          <div style={{ padding: "24px 28px" }}>
+            <AnalysisOverviewView
+              analysis={analysisData}
+              onFilterSessions={handleFilterFromChart}
+            />
+          </div>
         )}
 
-        {activeTab === "sessions" && analysisData && (
-          <SessionTableView
-            sessions={analysisData.sessions}
-            selectedSessionId={selectedSession?.id || null}
-            onSelectSession={handleSelectSessionFromTable}
-            onOpenVerdict={handleOpenVerdictFromTable}
-            activeFilterPreset={tableFilterPreset}
-            externalSearch={tableFilterSearch}
-          />
+        {/* SESSIONS TABLE */}
+        {currentPage === "sessions" && analysisData && (
+          <div style={{ padding: "24px 28px" }}>
+            <SessionTableView
+              sessions={analysisData.sessions}
+              selectedSessionId={selectedSession?.id || null}
+              onSelectSession={(s) => { setSelectedSession(s); setCurrentPage("detail"); }}
+              onOpenVerdict={(sessionId) => {
+                const target = analysisData?.sessions.find((s: SessionDetailSchema) => s.id === sessionId);
+                if (target) { setSelectedSession(target); setCurrentPage("detail"); }
+              }}
+              activeFilterPreset={tableFilterPreset}
+              externalSearch={tableFilterSearch}
+            />
+          </div>
         )}
 
-        {activeTab === "detail" && (
-          <SessionDetailView
-            session={selectedSession}
-            onVerdictSaved={(sessionId, verdict) => {
-              console.log(`Verdict saved for ${sessionId}: ${verdict}`);
-            }}
-          />
+        {/* SESSION DETAIL */}
+        {currentPage === "detail" && (
+          <div style={{ padding: "24px 28px" }}>
+            <SessionDetailView
+              session={selectedSession}
+              onVerdictSaved={(sessionId, verdict) => console.log(`Verdict: ${sessionId} → ${verdict}`)}
+            />
+          </div>
         )}
 
-        {activeTab === "correlations" && analysisData && (
-          <CorpusCorrelationsView
-            analysis={analysisData}
-            onFilterSessions={handleFilterFromChart}
-          />
+        {/* CORRELATIONS */}
+        {currentPage === "correlations" && analysisData && (
+          <div style={{ padding: "24px 28px" }}>
+            <CorpusCorrelationsView
+              analysis={analysisData}
+              onFilterSessions={handleFilterFromChart}
+            />
+          </div>
         )}
       </main>
 
@@ -204,7 +186,7 @@ function AnalystConsole() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AnalystConsole />
+      <AppShell />
     </QueryClientProvider>
   );
 }
