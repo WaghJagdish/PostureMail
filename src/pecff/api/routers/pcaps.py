@@ -91,7 +91,9 @@ async def upload_pcap(
     file_sha256 = sha256_hasher.hexdigest()
 
     # 1. Deduplication check
-    if file_sha256 in _DEDUPLICATED_PCAPS:
+    from pecff.api.routers.analyses import _ANALYSIS_STORE
+
+    if file_sha256 in _DEDUPLICATED_PCAPS and _DEDUPLICATED_PCAPS[file_sha256] in _ANALYSIS_STORE:
         existing_analysis_id = _DEDUPLICATED_PCAPS[file_sha256]
         response.status_code = status.HTTP_200_OK
         record_audit_log(

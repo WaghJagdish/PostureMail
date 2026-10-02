@@ -42,21 +42,9 @@ def get_analysis_or_404(analysis_id: str) -> AnalysisDetailResponse:
     if analysis_id in _ANALYSIS_STORE:
         return _ANALYSIS_STORE[analysis_id]
 
-    # Generate synthetic compliant mock analysis if ID is requested during tests
-    return AnalysisDetailResponse(
-        schema_version="1.0.0",
-        analysis_id=analysis_id,
-        created_at=datetime.datetime.now(datetime.UTC),
-        pcap_filename=f"capture_{analysis_id}.pcap",
-        pcap_sha256="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        status="COMPLETED",
-        total_packets=1000,
-        total_sessions=1,
-        overall_risk_score=15.0,
-        overall_risk_band="SECURE",
-        summary_data={"protocols": {"SMTP": 1}},
-        sessions=[],
-        findings=[],
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Analysis '{analysis_id}' not found or still processing.",
     )
 
 
