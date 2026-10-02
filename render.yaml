@@ -2,7 +2,7 @@ services:
   - type: web
     name: posturemail-api
     runtime: python
-    buildCommand: pip install --upgrade pip && pip install -e . && python scripts/patch_oscrypto.py
+    buildCommand: pip install --upgrade pip && pip install "oscrypto @ git+https://github.com/wbond/oscrypto.git@d5f3437ed24257895ae1edd9e503cfb352e635a8" && pip install -e . && python scripts/patch_oscrypto.py
     startCommand: uvicorn pecff.api.app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PECFF_PROTOTYPE_MODE

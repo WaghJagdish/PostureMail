@@ -211,6 +211,14 @@ class TLSHandshakeDecoder:
         offset = 0
         total_len = len(payload)
 
+        # In explicit STARTTLS streams, scan past leading plaintext protocol commands
+        # until the first TLS Handshake record header (0x16 0x03 0x00-0x04)
+        if total_len >= 5 and payload[0] not in (ContentType.CHANGE_CIPHER_SPEC, ContentType.ALERT, ContentType.HANDSHAKE, ContentType.APPLICATION_DATA, ContentType.HEARTBEAT):
+            import re
+            tls_header_match = re.search(rb"\x16\x03[\x00-\x04]", payload)
+            if tls_header_match:
+                offset = tls_header_match.start()
+
         while offset + 5 <= total_len:
             ct = payload[offset]
             rec_len = struct.unpack(">H", payload[offset + 3 : offset + 5])[0]

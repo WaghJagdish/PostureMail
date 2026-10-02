@@ -1,175 +1,123 @@
-"""Application startup patches.
+"""Application startup cryptographic verification and environment initialization.
 
-Applied once at import time before FastAPI app is created.
-Fixes known compatibility issues with the deployed environment.
-
-Patches applied:
-1. oscrypto libcrypto: On OpenSSL 3.x (Debian Bookworm / Render), oscrypto 1.3.0
-   fails in two ways:
-   a) The version regex only matches single-digit patch versions, not multi-digit like 3.0.11.
-   b) get_library('crypto', ...) may fail to find libcrypto.so on Debian Bookworm.
-   Fix: (a) patch the regex file in-place before import, (b) pre-configure the libcrypto path
-   via oscrypto.use() before certvalidator is first imported.
+Applied once at import time before FastAPI routers are registered.
+Ensures certvalidator, oscrypto, and libcrypto are functionally operational
+without any degraded modes or silent fallbacks.
 """
 
 from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import sys
 
 logger = logging.getLogger("pecff.startup")
 
+TARGET_BLOCK = r"""version_match = re.search(r"\b(\d+\.\d+\.\d+[a-z]*)\b", version_string)
+if not version_match:
+    version_match = re.search(r"(?<=LibreSSL )(\d+\.\d+(\.\d+)?)\b", version_string)
+if not version_match:
+    raise LibraryNotFoundError("Error detecting the version of libcrypto")
+version = version_match.group(1)
+version_parts = re.sub(r"(\d+)([a-z]+)", r"\1.\2", version).split(".")
+version_info = tuple(int(part) if part.isdigit() else part for part in version_parts)"""
 
-def _patch_oscrypto_version_regex() -> None:
-    """Monkey-patch the oscrypto version regex BEFORE it runs at module load.
 
-    oscrypto 1.3.0 uses a regex that only matches single-digit patch versions
-    (e.g., 3.0.1 matches but 3.0.11 does not). On Debian Bookworm with OpenSSL 3.x,
-    this causes LibraryNotFoundError: Error detecting the version of libcrypto.
+def _patch_oscrypto_module_files() -> None:
+    """Ensure both _libcrypto_cffi.py and _libcrypto_ctypes.py have the OpenSSL 3.x fix.
 
-    We patch the installed .py file in-place and invalidate the .pyc cache
-    so the next import loads the fixed version.
-
-    This must be called before any import of certvalidator or oscrypto._openssl.
+    oscrypto 1.3.0 ships with regex \\b(\\d\\.\\d\\.\\d[a-z]*)\\b which fails to
+    match OpenSSL 3.0.10+ (like 3.0.11, 3.0.13, 3.0.14 on Linux/Debian Bookworm/Render).
+    This applies the official upstream commit d5f3437 from wbond to both files.
     """
-    try:
-        # If already imported, we cannot re-patch (module is cached)
-        if "oscrypto._openssl._libcrypto_ctypes" in sys.modules:
-            return
+    for mod_name in ("oscrypto._openssl._libcrypto_cffi", "oscrypto._openssl._libcrypto_ctypes"):
+        if mod_name in sys.modules:
+            continue
 
-        import importlib.util
-        import pathlib
+        try:
+            import importlib.util
 
-        spec = importlib.util.find_spec("oscrypto._openssl._libcrypto_ctypes")
-        if spec is None or spec.origin is None:
-            return
+            spec = importlib.util.find_spec(mod_name)
+            if spec is None or spec.origin is None:
+                continue
 
-        src_path = pathlib.Path(spec.origin)
-        if not src_path.exists():
-            return
+            src_path = pathlib.Path(spec.origin)
+            if not src_path.exists():
+                continue
 
-        text = src_path.read_text(encoding="utf-8")
+            text = src_path.read_text(encoding="utf-8")
+            if r'version_match = re.search(r"\b(\d+\.\d+\.\d+[a-z]*)\b"' in text:
+                continue  # already patched
 
-        # The old pattern uses literal string with escaped chars matching only \d\.\d\.\d
-        OLD_PATTERN = "version_match = re.search('\\\\b(\\\\d\\\\.\\\\d\\\\.\\\\d[a-z]*)\\\\b', version_string)"
-        # New pattern matches full multi-digit patch versions like 3.0.11
-        NEW_PATTERN = "version_match = re.search(r'\\b(\\d+\\.\\d+\\.\\d+[a-z]*)\\b', version_string)"
+            idx_start = text.find("version_match = re.search")
+            if idx_start == -1:
+                continue
 
-        if OLD_PATTERN in text:
-            patched = text.replace(OLD_PATTERN, NEW_PATTERN)
-            src_path.write_text(patched, encoding="utf-8")
-            # Remove cached .pyc to force recompilation
-            import glob
-            for pyc in glob.glob(str(src_path.parent / "__pycache__" / "_libcrypto_ctypes*.pyc")):
+            idx_end = text.find("version_info = tuple(", idx_start)
+            if idx_end == -1:
+                continue
+
+            idx_end = text.find("\n", idx_end)
+            if idx_end == -1:
+                idx_end = len(text)
+
+            new_text = text[:idx_start] + TARGET_BLOCK + text[idx_end:]
+            src_path.write_text(new_text, encoding="utf-8")
+
+            # Remove any pyc cache
+            for pyc in src_path.parent.glob(f"__pycache__/{src_path.stem}*.pyc"):
                 try:
-                    os.unlink(pyc)
+                    pyc.unlink(missing_ok=True)
                 except Exception:
                     pass
-            logger.info("oscrypto: patched version regex in %s", src_path)
-        else:
-            # Check alternate known encodings of the same pattern
-            # (the string as stored on disk may differ slightly by Python version)
-            if "r'\\b(\\d+" in text or "r\"\\b(\\d+" in text:
-                logger.debug("oscrypto: version regex already uses extended pattern — skipping")
-            else:
-                logger.debug("oscrypto: could not find version regex pattern to patch (version may differ)")
-    except Exception as err:
-        logger.debug("oscrypto version regex patch encountered error: %s", err)
+
+            logger.info("Applied OpenSSL 3.x compatibility patch to %s", src_path.name)
+        except Exception as patch_err:
+            logger.debug("Startup patch check on %s: %s", mod_name, patch_err)
 
 
-def _patch_oscrypto_libcrypto() -> None:
-    """Ensure oscrypto can find and load libcrypto on the deployed platform.
+def _verify_crypto_subsystem() -> None:
+    """Verify that oscrypto and certvalidator can perform real X.509 operations.
 
-    Strategy (in order of preference):
-    1. If PECFF_LIBCRYPTO_PATH env var is set, use it directly.
-    2. Find libcrypto via ctypes.util.find_library (works on macOS/Linux).
-    3. Try well-known Debian Bookworm / Ubuntu Jammy paths for OpenSSL 3.x.
-    4. Fall through gracefully: log a warning but do not crash startup.
-       The certvalidator call sites already catch all exceptions and log them
-       as warnings without failing the analysis pipeline.
+    Raises RuntimeError if certificate validation is non-functional.
+    Never degrades silently.
     """
-    # If already loaded, nothing to do
+    _patch_oscrypto_module_files()
+
     try:
         import oscrypto
-        if oscrypto.backend():
-            return  # already configured
-    except Exception:
-        pass
-
-    lib_path: str | None = None
-
-    # 1. Operator override via environment variable
-    env_path = os.environ.get("PECFF_LIBCRYPTO_PATH")
-    if env_path and os.path.exists(env_path):
-        lib_path = env_path
-        logger.info("oscrypto: using PECFF_LIBCRYPTO_PATH=%s", lib_path)
-
-    # 2. ctypes.util.find_library
-    if lib_path is None:
-        try:
-            from ctypes.util import find_library
-            found = find_library("crypto")
-            if found:
-                lib_path = found
-                logger.info("oscrypto: find_library('crypto') -> %s", lib_path)
-        except Exception:
-            pass
-
-    # 3. Well-known Debian Bookworm / Ubuntu Jammy / macOS Homebrew paths
-    if lib_path is None:
-        candidates = [
-            "/usr/lib/x86_64-linux-gnu/libcrypto.so.3",
-            "/usr/lib/aarch64-linux-gnu/libcrypto.so.3",
-            "/usr/lib/libcrypto.so.3",
-            "/usr/lib/x86_64-linux-gnu/libcrypto.so",
-            "/usr/lib/libcrypto.so",
-            "/opt/homebrew/opt/openssl@3/lib/libcrypto.dylib",
-            "/usr/local/opt/openssl@3/lib/libcrypto.dylib",
-            "/usr/lib/libcrypto.dylib",
-        ]
-        for candidate in candidates:
-            if os.path.exists(candidate):
-                lib_path = candidate
-                logger.info("oscrypto: resolved libcrypto from candidate path: %s", lib_path)
-                break
-
-    if lib_path is None:
-        logger.warning(
-            "oscrypto: could not locate libcrypto — certvalidator certificate chain "
-            "validation will be DEGRADED. Set PECFF_LIBCRYPTO_PATH env var to fix."
-        )
-        return
-
-    # Apply oscrypto backend configuration before certvalidator is first imported
-    try:
-        import oscrypto
-        oscrypto.use("openssl", {"libcrypto_path": lib_path})
-        logger.info("oscrypto: configured openssl backend with libcrypto=%s", lib_path)
+        backend_name = oscrypto.backend()
     except Exception as err:
-        logger.warning(
-            "oscrypto: backend configuration failed (%s) — chain validation may be degraded", err
-        )
+        raise RuntimeError(f"Fatal: oscrypto failed to initialize backend: {err}") from err
 
-
-def _import_certvalidator_safely() -> None:
-    """Trigger certvalidator import so we fail fast and log rather than crash on first use."""
     try:
-        import certvalidator  # noqa: F401
-        logger.info("certvalidator: imported successfully")
+        import certvalidator
+        from certvalidator import CertificateValidator, ValidationContext
     except Exception as err:
-        logger.warning(
-            "certvalidator: import failed (%s) — X.509 chain validation will be DEGRADED. "
-            "PCAP analysis will continue but certificate trust path verification is unavailable.",
-            err,
-        )
-        # Do NOT re-raise: chain_validator.py wraps all certvalidator calls in try/except
-        # and emits VALIDATION_FAILURE findings gracefully.
+        raise RuntimeError(f"Fatal: certvalidator import failed: {err}") from err
+
+    # Perform functional verification using local trust root
+    try:
+        import certifi
+        from cryptography import x509
+        from cryptography.hazmat.primitives import serialization
+
+        with open(certifi.where(), "rb") as f:
+            certs = x509.load_pem_x509_certificates(f.read())
+        first_der = certs[0].public_bytes(serialization.Encoding.DER)
+        ctx = ValidationContext(trust_roots=[first_der])
+        val = CertificateValidator(first_der, validation_context=ctx)
+        val.validate_usage(set())
+    except Exception as err:
+        raise RuntimeError(
+            f"Fatal: X.509 certificate validation self-test failed with backend '{backend_name}': {err}"
+        ) from err
+
+    logger.info("certvalidator import successful")
+    logger.info("oscrypto initialization successful (backend: %s)", backend_name)
 
 
 def apply_all_patches() -> None:
-    """Apply all startup patches. Called once from app.py before create_app()."""
-    # Order matters: regex patch → path config → import test
-    _patch_oscrypto_version_regex()
-    _patch_oscrypto_libcrypto()
-    _import_certvalidator_safely()
+    """Verify and initialize the cryptographic subsystem on app startup."""
+    _verify_crypto_subsystem()

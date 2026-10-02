@@ -27,6 +27,7 @@ from pecff.api.routers.analyses import register_analysis
 from pecff.api.routers.tasks import update_task_state
 from pecff.api.schemas import (
     AnalysisDetailResponse,
+    CertificateSchema,
     FindingSchema,
     MLAnomalyResultSchema,
     RiskResultSchema,
@@ -35,6 +36,7 @@ from pecff.api.schemas import (
 )
 import struct
 from pecff.config import settings
+from pecff.crypto.chain_validator import OfflineChainValidator
 from pecff.crypto.cipher_db import cipher_db
 from pecff.crypto.risk_engine import NISTDeterministicRiskScorer, SessionCryptoParameters
 from pecff.crypto.x509_parser import X509Parser
@@ -349,6 +351,7 @@ def parse_and_score_shard_task(
             reassembler = StreamReassembler()
             classifier = ProtocolClassifier()
             risk_scorer = NISTDeterministicRiskScorer()
+            chain_validator = OfflineChainValidator()
 
             for pkt in reader:
                 total_packets += 1
@@ -443,13 +446,73 @@ def parse_and_score_shard_task(
                 if tls_summary.client_hello and 0x00FF in tls_summary.client_hello.cipher_suites:
                     secure_reneg = True
 
-                # Parse leaf certificate if present
+                # Parse and validate certificates if present
                 leaf_cert = None
+                chain_res = None
+                session_certs: list[dict[str, Any]] = []
                 if tls_summary.certificates_der:
                     try:
                         leaf_cert = X509Parser.parse_der(tls_summary.certificates_der[0])
                     except Exception as cert_err:
                         logger.debug("Failed parsing leaf certificate: %s", cert_err)
+
+                    try:
+                        chain_res = chain_validator.validate_chain(
+                            tls_summary.certificates_der,
+                            capture_timestamp=stream.first_seen,
+                        )
+                        for cf in chain_res.findings:
+                            findings_collected.append(
+                                {
+                                    "id": f"find-{analysis_id}-{len(findings_collected)}",
+                                    "session_id": f"sess-{analysis_id}-{shard_index}-{len(sessions_collected)}",
+                                    "rule_id": cf.rule_id,
+                                    "title": cf.rule_name,
+                                    "description": cf.description,
+                                    "severity": cf.severity,
+                                    "standards_ref": cf.standards_ref or "RFC 5280 / RFC 6960",
+                                    "evidence": cf.evidence if isinstance(cf.evidence, dict) else {"details": str(cf.evidence)},
+                                }
+                            )
+                        for ce in chain_res.errors:
+                            findings_collected.append(
+                                {
+                                    "id": f"find-{analysis_id}-{len(findings_collected)}",
+                                    "session_id": f"sess-{analysis_id}-{shard_index}-{len(sessions_collected)}",
+                                    "rule_id": ce.code,
+                                    "title": f"Certificate Validation Error ({ce.code})",
+                                    "description": ce.message,
+                                    "severity": "CRITICAL" if ce.code in ("CERT_REVOKED", "OCSP_REVOKED", "CRL_REVOKED") else "HIGH",
+                                    "standards_ref": "RFC 5280 §6.1",
+                                    "evidence": {"error_code": ce.code, "message": ce.message},
+                                }
+                            )
+                    except Exception as chain_err:
+                        logger.warning("Certificate chain validation error: %s", chain_err)
+
+                    for raw_der in tls_summary.certificates_der:
+                        try:
+                            parsed_c = X509Parser.parse_der(raw_der)
+                            session_certs.append(
+                                {
+                                    "fingerprint_sha256": parsed_c.fingerprint_sha256,
+                                    "spki_sha256": parsed_c.spki_sha256,
+                                    "subject_dn": parsed_c.subject_dn,
+                                    "issuer_dn": parsed_c.issuer_dn,
+                                    "serial_number": str(parsed_c.serial_number),
+                                    "not_before": parsed_c.not_before,
+                                    "not_after": parsed_c.not_after,
+                                    "lifetime_days": parsed_c.lifetime_days,
+                                    "public_key_algorithm": parsed_c.public_key_algorithm,
+                                    "public_key_bits": parsed_c.public_key_bits,
+                                    "signature_algorithm": parsed_c.signature_algorithm_oid,
+                                    "is_self_signed": parsed_c.is_self_signed,
+                                    "san_dns": list(parsed_c.san_dns),
+                                    "sct_count": parsed_c.sct_count,
+                                }
+                            )
+                        except Exception as cert_parse_err:
+                            logger.debug("Failed building certificate schema: %s", cert_parse_err)
 
                 # STARTTLS credential observation & auth
                 cleartext_creds = getattr(fsm, "credentials_in_cleartext", False)
@@ -470,6 +533,7 @@ def parse_and_score_shard_task(
                     kex_algorithm=kex_alg,
                     named_group=named_grp,
                     leaf_certificate=leaf_cert,
+                    chain_validation_result=chain_res,
                 )
                 risk_res = risk_scorer.score_session(crypto_params)
 
@@ -509,6 +573,7 @@ def parse_and_score_shard_task(
                         "ehlo_domain": fsm.ehlo_domain,
                         "cleartext_credentials_observed": cleartext_creds,
                         "has_auth": has_auth,
+                        "certificates": session_certs,
                         "risk_breakdown": {
                             "score": float(risk_res.score),
                             "band": risk_res.band,
@@ -824,6 +889,7 @@ def index_and_persist_task(corpus_data: dict[str, Any]) -> str:
                 risk_breakdown=RiskResultSchema(**s["risk_breakdown"])
                 if s.get("risk_breakdown")
                 else None,
+                certificates=[CertificateSchema(**c) for c in s.get("certificates", [])],
                 ml_result=MLAnomalyResultSchema(**s["ml_result"]) if s.get("ml_result") else None,
             )
             for s in corpus_data.get("sessions", [])

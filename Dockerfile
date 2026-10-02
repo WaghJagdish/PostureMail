@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpcap-dev \
     libpq-dev \
     libssl-dev \
+    git \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,6 +21,7 @@ COPY src/ /app/src/
 COPY scripts/ /app/scripts/
 
 RUN pip install --upgrade pip && \
+    pip install "oscrypto @ git+https://github.com/wbond/oscrypto.git@d5f3437ed24257895ae1edd9e503cfb352e635a8" && \
     pip install -e .
 
 # Patch oscrypto 1.3.0 version regex for OpenSSL 3.x compatibility on Debian Bookworm.
