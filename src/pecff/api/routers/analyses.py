@@ -13,7 +13,7 @@ import datetime
 import json
 from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.responses import StreamingResponse
 
 from pecff.api.schemas import (
