@@ -123,29 +123,29 @@ async def upload_pcap(
         length=len(full_data),
     )
 
-    # 3. Create analysis ID and dispatch Celery pipeline
+    # 3. Create analysis ID and dispatch pipeline (Celery or inline)
     analysis_id = file_id
     task_id = f"task-{analysis_id}"
     _DEDUPLICATED_PCAPS[file_sha256] = analysis_id
 
-    # Enqueue pipeline task (Celery with automatic in-process fallback)
-    # We probe the broker with a short ping first — send_task() always returns
-    # a truthy AsyncResult even when Redis is down, so we can't rely on it.
     dispatched_celery = False
-    try:
-        from pecff.tasks.celery_app import celery_app
 
-        ping_replies = celery_app.control.ping(timeout=0.5)
-        if ping_replies:  # At least one worker responded
-            celery_app.send_task(
-                "pecff.tasks.pipeline.run_forensic_pipeline",
-                args=[analysis_id, object_name, filename, file_sha256, total_bytes],
-                task_id=task_id,
-                queue="pecff.ingest",
-            )
-            dispatched_celery = True
-    except Exception:
-        dispatched_celery = False
+    if not settings.prototype_mode:
+        # Production path: try Celery worker first
+        try:
+            from pecff.tasks.celery_app import celery_app
+
+            ping_replies = celery_app.control.ping(timeout=0.5)
+            if ping_replies:  # At least one worker responded
+                celery_app.send_task(
+                    "pecff.tasks.pipeline.run_forensic_pipeline",
+                    args=[analysis_id, object_name, filename, file_sha256, total_bytes],
+                    task_id=task_id,
+                    queue="pecff.ingest",
+                )
+                dispatched_celery = True
+        except Exception:
+            dispatched_celery = False
 
     if not dispatched_celery:
         import asyncio
@@ -186,7 +186,7 @@ async def upload_pcap(
                 index_and_persist_task(ml_res)
             except Exception as e:
                 import logging
-                logging.getLogger("pecff.pcaps").error("Local pipeline fallback failed: %s", e, exc_info=True)
+                logging.getLogger("pecff.pcaps").error("Local pipeline failed: %s", e, exc_info=True)
                 update_task_state(
                     task_id=task_id,
                     state="FAILURE",

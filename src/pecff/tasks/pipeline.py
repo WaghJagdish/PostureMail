@@ -18,7 +18,7 @@ import logging
 import zlib
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from celery import chord, group
 

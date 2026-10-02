@@ -9,6 +9,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from pecff.api.routers import analyses, pcaps, tasks, verdicts
+from pecff.api.startup import apply_all_patches
+
+# Apply compatibility patches (oscrypto, etc.) before routers are imported
+apply_all_patches()
+
 
 
 def create_app() -> FastAPI:

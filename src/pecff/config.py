@@ -313,6 +313,10 @@ class Settings(BaseSettings):
         default=3300,
         description="Soft timeout for Celery forensic analysis jobs.",
     )
+    prototype_mode: bool = Field(
+        default=False,
+        description="When True, forensic pipeline runs directly in the FastAPI process without Celery/Redis.",
+    )
     deployment_salt: str = Field(
         default="pecff_default_deployment_salt_2026",
         description="Deployment salt for pseudonymous PII and credential hashing.",
